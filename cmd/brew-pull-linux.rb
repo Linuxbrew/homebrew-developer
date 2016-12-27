@@ -1,4 +1,4 @@
-#: `pull` [`--bottle`] [`--bump`] [`--clean`] [`--ignore-whitespace`] [`--resolve`] [`--branch-okay`] [`--no-pbcopy`] [`--no-publish`] <patch-source> [<patch-source>]
+#: `pull-linux` [`--bottle`] [`--bump`] [`--clean`] [`--ignore-whitespace`] [`--resolve`] [`--branch-okay`] [`--no-pbcopy`] [`--no-publish`] <patch-source> [<patch-source>]
 #:
 #:    Gets a patch from a GitHub commit or pull request and applies it to Homebrew.
 #:    Optionally, installs the formulae changed by the patch.
@@ -42,12 +42,18 @@ require "pkg_version"
 module Homebrew
   module_function
 
+  def linux?
+    !ARGV.include? "--mac"
+  end
+
   def pull
     odie "You meant `git pull --rebase`." if ARGV[0] == "--rebase"
 
     if ARGV.named.empty?
       odie "This command requires at least one argument containing a URL or pull request number"
     end
+
+    ENV["HOMEBREW_BOTTLE_DOMAIN"] ||= "https://linuxbrew.bintray.com" if linux?
 
     do_bump = ARGV.include?("--bump") && !ARGV.include?("--clean")
 
@@ -205,7 +211,8 @@ module Homebrew
           url
         else
           bottle_branch = "pull-bottle-#{issue}"
-          "https://github.com/BrewTestBot/homebrew-#{tap.repo}/compare/homebrew:master...pr-#{issue}"
+          testbot = linux? ? "LinuxbrewTestBot" : "BrewTestBot"
+          "https://github.com/#{testbot}/homebrew-#{tap.repo}/compare/#{user}:master...pr-#{issue}"
         end
 
         curl "--silent", "--fail", "-o", "/dev/null", "-I", bottle_commit_url
@@ -402,6 +409,7 @@ module Homebrew
 
   # Publishes the current bottle files for a given formula to Bintray
   def publish_bottle_file_on_bintray(f, creds)
+    bintray_project = linux? ? "linuxbrew" : "homebrew"
     repo = Utils::Bottles::Bintray.repository(f.tap)
     package = Utils::Bottles::Bintray.package(f.name)
     info = FormulaInfoFromJson.lookup(f.name)
@@ -413,7 +421,7 @@ module Homebrew
          "-u#{creds[:user]}:#{creds[:key]}", "-X", "POST",
          "-H", "Content-Type: application/json",
          "-d", '{"publish_wait_for_secs": 0}',
-         "https://api.bintray.com/content/homebrew/#{repo}/#{package}/#{version}/publish"
+         "https://api.bintray.com/content/#{bintray_project}/#{repo}/#{package}/#{version}/publish"
   end
 
   # Formula info drawn from an external "brew info --json" call
@@ -513,7 +521,13 @@ module Homebrew
           opoo "Cannot publish bottle: Failed reading info for formula #{f.full_name}"
           next
         end
-        bottle_info = jinfo.bottle_info(jinfo.bottle_tags.first)
+        bottle_info = jinfo.bottle_info(
+          if linux? && jinfo.bottle_tags.include?("x86_64_linux")
+            "x86_64_linux"
+          else
+            jinfo.bottle_tags.first
+          end
+        )
         unless bottle_info
           opoo "No bottle defined in formula #{f.full_name}"
           next
@@ -576,3 +590,5 @@ module Homebrew
     end
   end
 end
+
+Homebrew.pull
