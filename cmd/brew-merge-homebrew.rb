@@ -136,7 +136,13 @@ module Homebrew
 
     puts "Updated bottle commits: #{bottle_commits.join(" ")}"
     system git, "cherry-pick", *bottle_commits
-    system git, "cherry-pick", "--continue" until resolve_conflicts.empty?
+    while Utils.popen_read(git, "status").include? "You are currently cherry-picking"
+      if resolve_conflicts.empty?
+        opoo "Skipping empty patch"
+        system git, "reset"
+      end
+      system git, "cherry-pick", "--continue"
+    end
 
     safe_system git, "diff", "homebrew/master..master"
     safe_system git, "log", "--oneline", "--decorate=short", "homebrew/master..master"
