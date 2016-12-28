@@ -16,12 +16,23 @@ module Homebrew
     @git ||= Utils.git_path
   end
 
+  def resolve_conflicts_with_sed(files)
+    safe_system "sed", "-E", "-i.orig",
+      "/^=======/,/^>>>>>>>/{/^    cellar :any/d;};/^(<<<<<<<|=======|>>>>>>>)/d",
+      *files
+    rm_f files.map { |s| "#{s}.orig" }
+  end
+
   def resolve_conflicts
     conflicts = Utils.popen_read(git, "diff", "--name-only", "--diff-filter=U").split
     return conflicts if conflicts.empty?
     oh1 "Conflicts"
     puts conflicts.join(" ")
-    safe_system *editor, *conflicts
+    if ARGV.include? "--resolve"
+      safe_system *editor, *conflicts
+    else
+      resolve_conflicts_with_sed conflicts
+    end
     safe_system HOMEBREW_BREW_FILE, "style", *conflicts
     safe_system git, "diff", "--check"
     safe_system git, "add", "--", *conflicts
