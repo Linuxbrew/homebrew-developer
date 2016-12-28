@@ -32,20 +32,21 @@ module Homebrew
     start_sha1 = Utils.popen_read(git, "rev-parse", "HEAD").chomp
     puts "Start commit: #{start_sha1}"
 
+    # Update the Mac bottle.
+    system HOMEBREW_BREW_FILE, "pull", "--bottle", *ARGV
+    mac_sha1 = Utils.popen_read(git, "rev-parse", "HEAD").chomp
+    puts "Mac commit: #{mac_sha1}"
+    safe_system git, "reset", "--hard", start_sha1
+
     # Update the Linux bottle.
     safe_system HOMEBREW_BREW_FILE, "pull-linux", "--bottle", *ARGV
     linux_sha1 = Utils.popen_read(git, "rev-parse", "HEAD").chomp
     puts "Linux commit: #{linux_sha1}"
 
-    # Update the Mac bottle.
-    safe_system git, "reset", "--hard", start_sha1
-    system HOMEBREW_BREW_FILE, "pull", "--bottle", *ARGV
-
     # Merge the Linux bottle and resolve conflicts.
     safe_system git, "checkout", "-B", "master"
-    system git, "rebase", "master", linux_sha1
+    system git, "rebase", mac_sha1
     system git, "rebase", "--continue" until resolve_conflicts.empty?
-    safe_system git, "checkout", "-B", "master"
   end
 end
 
