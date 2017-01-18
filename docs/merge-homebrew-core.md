@@ -124,20 +124,7 @@ Once all the conflicts have been resolved, finish the merge by running
 ```bash
 git commit
 ```
-It will open a text editor with pre-populated message title:
-
-```text
-Merge branch homebrew/master into linuxbrew/master
-```
-The body of the commit message will also list the conflicts encountered during the merge in a commented out block. In our example, it will look like this:
-
-```text
-# Conflicts:
-#        Formula/git-lfs.rb
-#        Formula/gnutls.rb
-#        Formula/godep.rb
-```
-Uncomment this block but leave the title unchaged. Final commit message should read as follows:
+It will open a text editor with pre-populated commit message title and body that will look like this:
 
 ```text
 Merge branch homebrew/master into linuxbrew/master
@@ -147,10 +134,11 @@ Conflicts:
         Formula/gnutls.rb
         Formula/godep.rb
 ```
+Leave the entire commit message unchaged.
 
 ## Submitting a PR
 
-When we executed `git commit` in the previous step, the merge has been recorded in our local branch `master`. Before these changes can be merged into Linuxbrew, we have to run basic checks on Travis and Circle CIs. This requires a pull request. To do that, we have to push our local branch `master` to a new branch in your GitHub fork:
+The merge is now recorded in our local branch `master`. Before these changes can make their way into Linuxbrew, we have to run basic checks on Travis and Circle CIs. This requires a GitHub pull request. To do that, we have to push our local branch `master` to a new branch in your GitHub fork:
 
 ```bash
 git push your-fork master:merge-YYYY-MM-DD
