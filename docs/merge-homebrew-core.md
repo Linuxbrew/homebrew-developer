@@ -10,7 +10,7 @@ First of all, we want to enable developer commands and prevent automatic updates
 
 ```bash
 export HOMEBREW_DEVELOPER=1
-export HOMEBREW_NO_AUTO_UPDATES=1
+export HOMEBREW_NO_AUTO_UPDATE=1
 ```
 
 Once we've done that, we need to get access to the `merge-homebrew` command that will be used for the merge. To do that we have to tap `linuxbrew/homebrew-developer` repo:
