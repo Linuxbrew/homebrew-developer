@@ -1,12 +1,14 @@
-#:  * `pull_circle` [`--ci-upload`] patch-source
+#:  * `pull_circle` [`--ci-upload`] [`--keep-old`] patch-source
 #:    Download bottles from Circle CI.
 #:
-#:    `--ci-upload` Upload the bottles to Bintray using test-bot --ci-upload
+#:    `--ci-upload` Upload the bottles to Bintray using `brew test-bot --ci-upload`
+#:    `--keep-old` Build new bottles for a single platform
 
 module Homebrew
   def ci_upload(issue)
     env = { "CIRCLE_PR_NUMBER" => issue }
-    system env, HOMEBREW_BREW_FILE, "test-bot", "--ci-upload"
+    args = ARGV.include?("--keep-old") ? ["--keep-old"] : []
+    system env, HOMEBREW_BREW_FILE, "test-bot", "--ci-upload", *args
   end
 
   # The GitHub slug of the {Tap}.
