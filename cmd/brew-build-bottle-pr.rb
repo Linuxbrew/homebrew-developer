@@ -96,7 +96,7 @@ module Homebrew
         safe_system "git", "commit", formula.path, "-m", message
         safe_system "git", "push", remote, branch
         ohai "#{formula}: Using remote '#{remote}' to submit Pull Request" if ARGV.verbose?
-        safe_system "hub", "pull-request", "--browse",
+        safe_system "hub", "pull-request",
           "-h", "#{remote}:#{branch}", "-m", message
       end
       safe_system "git", "checkout", "master"
