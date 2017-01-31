@@ -59,7 +59,7 @@ module Homebrew
         ohai "Checking that specified remote exists in #{Dir.pwd}" if ARGV.verbose?
         determine_remote
         unless `git status --porcelain 2>/dev/null`.chomp.empty?
-          return ohai "#{formula}: Skipping because you have uncommitted changes to #{Dir.pwd}"
+          return ohai "Warning! You have uncommitted changes to #{Dir.pwd}"
         end
       end
     end
