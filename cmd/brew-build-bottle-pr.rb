@@ -9,9 +9,21 @@
 #:    If `--verbose` is passed, print extra information.
 
 module Homebrew
+  # The GitHub slug of the {Tap}.
+  # Not simply "#{user}/homebrew-#{repo}", because the slug of homebrew/core
+  # may be either Homebrew/homebrew-core or Linuxbrew/homebrew-core.
+  def slug(tap)
+    if tap.remote.nil?
+      "#{tap.user}/homebrew-#{tap.repo}"
+    else
+      x = tap.remote[%r{^https://github\.com/([^.]+)(\.git)?$}, 1]
+      (tap.official? && !x.nil?) ? x.capitalize : x
+    end
+  end
+
   def open_pull_request?(formula)
     prs = GitHub.issues_matching(formula,
-      type: "pr", state: "open", repo: formula.tap.slug)
+      type: "pr", state: "open", repo: slug(formula.tap))
     prs = prs.select { |pr| pr["title"].start_with? "#{formula}: " }
     if prs.any?
       ohai "#{formula}: Skipping because a PR is open"
