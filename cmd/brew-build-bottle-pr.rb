@@ -96,11 +96,10 @@ module Homebrew
         safe_system "git", "commit", formula.path, "-m", message
         safe_system "git", "push", remote, branch
         ohai "#{formula}: Using remote '#{remote}' to submit Pull Request" if ARGV.verbose?
-        hub_pr_args = %W[
-          #{"--browse" unless ENV["BROWSER"].nil? && ENV["HOMEBREW_BROWSER"].nil?}
-          -h #{remote}:#{branch} -m #{message}
-        ].compact
-        safe_system "hub", "pull-request", *hub_pr_args
+        safe_system "hub", "pull-request",
+          "-h", "#{remote}:#{branch}", "-m", "\"#{message}\"",
+          *("--browse" unless ENV["BROWSER"].nil? && ENV["HOMEBREW_BROWSER"].nil?)
+
       end
       safe_system "git", "checkout", "master"
       safe_system "git", "branch", "-D", branch
