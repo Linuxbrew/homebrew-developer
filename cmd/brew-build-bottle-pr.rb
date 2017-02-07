@@ -97,7 +97,7 @@ module Homebrew
         safe_system "git", "push", remote, branch
         ohai "#{formula}: Using remote '#{remote}' to submit Pull Request" if ARGV.verbose?
         safe_system "hub", "pull-request",
-          "-h", "#{remote}:#{branch}", "-m", message
+          "-h", "#{remote}:#{branch}", "-m", message,
           *("--browse" unless ENV["BROWSER"].nil? && ENV["HOMEBREW_BROWSER"].nil?)
       end
       safe_system "git", "checkout", "master"
