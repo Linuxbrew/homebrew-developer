@@ -112,6 +112,7 @@ module Homebrew
         ohai "#{formula}: Using remote '#{remote}' to submit Pull Request" if ARGV.verbose?
         safe_system "hub", "pull-request",
           "-h", "#{remote}:#{branch}", "-m", message,
+          "-l", "bottle", "-a", remote,
           *("--browse" unless ENV["BROWSER"].nil? && ENV["HOMEBREW_BROWSER"].nil?)
       end
       safe_system "git", "checkout", "master"
