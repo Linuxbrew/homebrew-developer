@@ -77,6 +77,13 @@ module Homebrew
     end
   end
 
+  def audit(formulae)
+    formulae.each do |formula|
+      safe_system "brew", "audit", "--strict", "--online", formula
+      odie "Please fix audit failue with #{formula}" unless $?.success?
+    end
+  end
+
   # The number of bottled formula.
   @n = 0
 
@@ -140,6 +147,7 @@ module Homebrew
       formulae = deps.map { |f| Formula[f] } + formulae
     end
     check_remotes formulae
+    audit formulae
     formulae.each { |f| build_bottle f }
   end
 end
