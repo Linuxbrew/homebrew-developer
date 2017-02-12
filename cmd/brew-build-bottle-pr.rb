@@ -79,7 +79,7 @@ module Homebrew
 
   def audit(formulae)
     formulae.each do |formula|
-      safe_system "brew", "audit", "--strict", "--online", formula
+      system HOMEBREW_BREW_FILE, "audit", "--strict", "--online", formula.path
       odie "Please fix audit failure for #{formula}" unless $?.success?
     end
   end
