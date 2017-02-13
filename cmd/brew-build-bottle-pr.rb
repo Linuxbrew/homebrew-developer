@@ -91,12 +91,13 @@ module Homebrew
     return ohai "#{formula}: Skipping because it has a bottle already" if formula.bottle_specification.tag?(tag)
     return ohai "#{formula}: Skipping because #{tap} does not support Linux" if slug(tap)[/^Homebrew/] && tap.repo != "science"
     return if open_pull_request? formula
-    system HOMEBREW_BREW_FILE, "audit", "--strict", "--online", formula.path
-    odie "Please fix audit failure for #{formula}" unless $?.success?
 
     @n += 1
     return ohai "#{formula}: Skipping because GitHub rate limits pull requests (limit = #{limit})." if @n > limit
 
+    system HOMEBREW_BREW_FILE, "audit", "--strict", "--online", formula.path
+    odie "Please fix audit failure for #{formula}" unless $?.success?
+    
     message = "#{formula}: Build a bottle for Linuxbrew"
     oh1 "#{@n}. #{message}"
 
