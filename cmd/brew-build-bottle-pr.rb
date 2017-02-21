@@ -97,20 +97,24 @@ module Homebrew
 
     system HOMEBREW_BREW_FILE, "audit", "--strict", "--online", formula.path
     odie "Please fix audit failure for #{formula}" unless $?.success?
-    
+
     message = "#{formula}: Build a bottle for Linuxbrew"
     oh1 "#{@n}. #{message}"
 
-    File.open(formula.path, "r+") do |f|
-      s = f.read
-      f.rewind
-      f.write "# #{message}\n#{s}" unless ARGV.dry_run?
-    end
     branch = "bottle-#{formula}"
     cd tap_dir do
+      bottle_branches = Utils.popen_read("git", "branch", "--list", "bottle-*").split
+      safe_system "git", "branch", "-D", branch if bottle_branches.include? branch
       safe_system "git", "checkout", "-b", branch, "master"
+      File.open(formula.path, "r+") do |f|
+        s = f.read
+        f.rewind
+        f.write "# #{message}\n#{s}" unless ARGV.dry_run?
+      end
       unless ARGV.dry_run?
         safe_system "git", "commit", formula.path, "-m", message
+        remote_bottle_branches = Utils.popen_read("git", "branch", "-r", "--list", "#{remote}/bottle-*")
+        safe_system "git", "push", "--delete", remote, branch if remote_bottle_branches.include? "#{remote}/#{branch}"
         safe_system "git", "push", remote, branch
         ohai "#{formula}: Using remote '#{remote}' to submit Pull Request" if ARGV.verbose?
         safe_system "hub", "pull-request",
