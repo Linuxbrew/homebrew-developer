@@ -119,12 +119,34 @@ Note, that in the "HEAD" (Linuxbrew's) part we see previous code of the Homebrew
 
 ## Finishing the merge
 
-Once all the conflicts have been resolved, finish the merge by running
+Once all the conflicts have been resolved, check that there are no obvious stylistic offenses that will prevent bottles from beeing built successfully:
+
+```bash
+brew style
+```
+
+Fix all the offenses, if any, and add changed files to the staging area by executing
+
+```bash
+git add Formula/<formula-name>.rb
+```
+
+Finish the merge by running:
 
 ```bash
 git commit
 ```
-It will open a text editor with pre-populated commit message title and body that will look like this:
+This will open a text editor with pre-populated commit message title and body that will look like this:
+
+```text
+Merge branch homebrew/master into linuxbrew/master
+
+# Conflicts:
+#       Formula/git-lfs.rb
+#       Formula/gnutls.rb
+#       Formula/godep.rb
+```
+Leave the title of the message unchanged and uncomment all the conflicting files. Your final commit message should be:
 
 ```text
 Merge branch homebrew/master into linuxbrew/master
@@ -134,7 +156,6 @@ Conflicts:
         Formula/gnutls.rb
         Formula/godep.rb
 ```
-Leave the entire commit message unchaged.
 
 ## Submitting a PR
 
@@ -157,6 +178,17 @@ Once the PR successfully passes the tests and/or is approved by other Linuxbrew 
 ```bash
 git checkout master
 git push origin master
+```
+
+The merge is now complete. Don't forget to update your GitHub fork:
+```bash
+git push your-fork master
+```
+
+Now, create PRs to build bottles for formulae that encountered a conflict. Here is a simple code snippet that does that by parsing the log message of the last commit:
+
+```bash
+brew build-bottle-pr --remote=your-fork $(git log -1 | grep "Formula/" | sed 's|^\s\+Formula/\(.*\).rb|\1|g')
 ```
 
 ## That's it!
