@@ -78,6 +78,15 @@ module Homebrew
     end
   end
 
+  # Add --keep-old to circle.yml
+  def keep_old
+    Utils::Inreplace.inreplace("circle.yml") do |s|
+      s.sub! /brew test-bot$/, "brew test-bot --keep-old"
+      s.sub! /ci-upload$/, "ci-upload?keep-old=1"
+    end
+    safe_system "git", "commit", "circle.yml", "-m", "drop! Add --keep-old to circle.yml"
+  end
+
   # The number of bottled formula.
   @n = 0
 
@@ -116,6 +125,7 @@ module Homebrew
         f.write "# #{message}\n#{s}" unless ARGV.dry_run?
       end
       unless ARGV.dry_run?
+        keep_old if ARGV.include? "--keep-old"
         safe_system "git", "commit", formula.path, "-m", message
         unless Utils.popen_read("git", "branch", "-r", "--list", "#{remote}/#{branch}").empty?
           return ohai "#{formula}: Skipping because branch #{branch} already exists on remote #{remote}" unless ARGV.force?
