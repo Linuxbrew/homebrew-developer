@@ -229,6 +229,13 @@ module Homebrew
           published = publish_changed_formula_bottles(tap, changed_formulae_names)
           bintray_published_formulae.concat(published)
         end
+
+        # Squash a Linuxbrew build-bottle-pr commit.
+        if Utils.popen_read("git", "diff", orig_revision, "HEAD") =~ /^drop! |^\+# .*: Build a bottle for Linuxbrew$/
+          ohai "Squashing build-bottle-pr commit"
+          tap.install unless (tap = Tap.new("Linuxbrew", "developer")).installed?
+          safe_system HOMEBREW_BREW_FILE, "squash-bottle-pr"
+        end
       end
 
       ohai "Patch changed:"
