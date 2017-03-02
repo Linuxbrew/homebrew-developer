@@ -1,4 +1,4 @@
-#:  * `build-bottle-pr` [`--remote=<user>`] [`--tag=<tag>`] [`--limit=<num>`] [`--dry-run`] [`--verbose`]:
+#:  * `build-bottle-pr` [`--remote=<user>`] [`--tag=<tag>`] [`--limit=<num>`] [`--dry-run`] [`--verbose`] [`--force`]:
 #:    Submit a pull request to build a bottle for a formula.
 #:
 #:    If `--remote` is passed, use the specified GitHub remote.
@@ -7,6 +7,7 @@
 #:    If `--limit` is passed, make at most the specified number of PR's at once. Defaults to 10.
 #:    If `--dry-run` is passed, do not actually make any PR's.
 #:    If `--verbose` is passed, print extra information.
+#:    If `--force` is passed, delete local and remote 'bottle-<name>' branches if they exist. Use with care.
 
 module Homebrew
   # The GitHub slug of the {Tap}.
@@ -103,7 +104,11 @@ module Homebrew
 
     branch = "bottle-#{formula}"
     cd tap_dir do
-      safe_system "git", "branch", "-D", branch unless Utils.popen_read("git", "branch", "--list", branch).empty?
+      unless Utils.popen_read("git", "branch", "--list", branch).empty?
+        return ohai "#{formula}: Skipping because branch #{branch} already exists" unless ARGV.force?
+        ohai "#{formula}: Removing branch #{branch} in #{tap_dir}" if ARGV.verbose?
+        safe_system "git", "branch", "-D", branch
+      end
       safe_system "git", "checkout", "-b", branch, "master"
       File.open(formula.path, "r+") do |f|
         s = f.read
@@ -112,7 +117,11 @@ module Homebrew
       end
       unless ARGV.dry_run?
         safe_system "git", "commit", formula.path, "-m", message
-        safe_system "git", "push", "--delete", remote, branch unless Utils.popen_read("git", "branch", "-r", "--list", "#{remote}/#{branch}").empty?
+        unless Utils.popen_read("git", "branch", "-r", "--list", "#{remote}/#{branch}").empty?
+          return ohai "#{formula}: Skipping because branch #{branch} already exists on remote #{remote}" unless ARGV.force?
+          ohai "#{formula}: Removing branch #{branch} from #{remote}" if ARGV.verbose?
+          safe_system "git", "push", "--delete", remote, branch 
+        end
         safe_system "git", "push", remote, branch
         ohai "#{formula}: Using remote '#{remote}' to submit Pull Request" if ARGV.verbose?
         safe_system "hub", "pull-request",
