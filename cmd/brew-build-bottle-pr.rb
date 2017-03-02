@@ -103,8 +103,7 @@ module Homebrew
 
     branch = "bottle-#{formula}"
     cd tap_dir do
-      bottle_branches = Utils.popen_read("git", "branch", "--list", "bottle-*").split
-      safe_system "git", "branch", "-D", branch if bottle_branches.include? branch
+      safe_system "git", "branch", "-D", branch unless Utils.popen_read("git", "branch", "--list", branch).empty?
       safe_system "git", "checkout", "-b", branch, "master"
       File.open(formula.path, "r+") do |f|
         s = f.read
@@ -113,8 +112,7 @@ module Homebrew
       end
       unless ARGV.dry_run?
         safe_system "git", "commit", formula.path, "-m", message
-        remote_bottle_branches = Utils.popen_read("git", "branch", "-r", "--list", "#{remote}/bottle-*")
-        safe_system "git", "push", "--delete", remote, branch if remote_bottle_branches.include? "#{remote}/#{branch}"
+        safe_system "git", "push", "--delete", remote, branch unless Utils.popen_read("git", "branch", "-r", "--list", "#{remote}/#{branch}").empty?
         safe_system "git", "push", remote, branch
         ohai "#{formula}: Using remote '#{remote}' to submit Pull Request" if ARGV.verbose?
         safe_system "hub", "pull-request",
