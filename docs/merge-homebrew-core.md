@@ -68,7 +68,7 @@ Note, that you can also get a list of unmerged files (*i.e.* files with conflict
 git diff --name-only --diff-filter=U
 ```
 
-Of course, conflicts will be different every merge. You have to resolve these conflicts either manually in a text editor, or by using tools like `diffuse`, `tkdiff`, or `meld`, all of which are available in Linuxbrew (the latter one is provided in `homebrew/gui` tap: `homebrew/gui/meld`). Frequently, conflicts are caused by the new versions of Mac bottles and look like:
+Of course, conflicts will be different every merge. You have to resolve these conflicts either manually in a text editor, or by using tools like `diffuse`, `tkdiff`, or `meld`, some of which are available from Linuxbrew. Frequently, conflicts are caused by the new versions of Mac bottles and look like:
 
 ```ruby
 <<<<<<< HEAD
