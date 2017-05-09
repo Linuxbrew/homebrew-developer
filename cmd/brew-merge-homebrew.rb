@@ -48,7 +48,7 @@ module Homebrew
     safe_system HOMEBREW_BREW_FILE, "style", *conflicts
     safe_system git, "diff", "--check"
     safe_system git, "add", "--", *conflicts
-    return conflicts
+    conflicts
   end
 
   def merge_brew
