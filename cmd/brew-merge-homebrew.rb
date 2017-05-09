@@ -19,6 +19,18 @@ module Homebrew
     @git ||= Utils.git_path
   end
 
+  def git_merge_commit(sha1, fast_forward: false)
+    start_sha1 = Utils.popen_read(git, "rev-parse", "HEAD").chomp
+    end_sha1 = Utils.popen_read(git, "rev-parse", sha1).chomp
+
+    puts "Start commit: #{start_sha1}"
+    puts "End   commit: #{end_sha1}"
+
+    args = []
+    args << "--ff-only" if fast_forward
+    system git, "merge", *args, sha1, "-m", "Merge branch homebrew/master into linuxbrew/master"
+  end
+
   def git_merge(fast_forward: false)
     remotes = Utils.popen_read(git, "remote").split
     odie "Please add a remote with the name 'homebrew' in #{Dir.pwd}" unless remotes.include? "homebrew"
@@ -26,17 +38,7 @@ module Homebrew
 
     safe_system git, "pull", "--ff-only", "origin", "master"
     safe_system git, "fetch", "homebrew"
-    homebrew_commits.each do |hbc|
-      start_sha1 = Utils.popen_read(git, "rev-parse", "HEAD").chomp
-      end_sha1 = Utils.popen_read(git, "rev-parse", hbc).chomp
-
-      puts "Start commit: #{start_sha1}"
-      puts "End   commit: #{end_sha1}"
-
-      args = []
-      args << "--ff-only" if fast_forward
-      system git, "merge", *args, hbc, "-m", "Merge branch homebrew/master into linuxbrew/master"
-    end
+    homebrew_commits.each { |sha1| git_merge_commit sha1 }
   end
 
   def resolve_conflicts
