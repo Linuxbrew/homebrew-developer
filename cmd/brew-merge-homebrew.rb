@@ -48,7 +48,7 @@ module Homebrew
     safe_system HOMEBREW_BREW_FILE, "style", *conflicts
     safe_system git, "diff", "--check"
     safe_system git, "add", "--", *conflicts
-    conflicts
+    return conflicts
   end
 
   def merge_brew
@@ -153,7 +153,7 @@ module Homebrew
 
   def homebrew_commits
     if ARGV.named.empty?
-      "homebrew/master"
+      ["homebrew/master"]
     else
       ARGV.named.each { |hbc| safe_system git, "rev-parse", hbc }
       ARGV.named
