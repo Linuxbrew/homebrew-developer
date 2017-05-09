@@ -26,15 +26,17 @@ module Homebrew
 
     safe_system git, "pull", "--ff-only", "origin", "master"
     safe_system git, "fetch", "homebrew"
-    start_sha1 = Utils.popen_read(git, "rev-parse", "origin/master").chomp
-    end_sha1 = Utils.popen_read(git, "rev-parse", "homebrew/master").chomp
+    homebrew_commits.each do |hbc|
+      start_sha1 = Utils.popen_read(git, "rev-parse", "HEAD").chomp
+      end_sha1 = Utils.popen_read(git, "rev-parse", hbc).chomp
 
-    puts "Start commit: #{start_sha1}"
-    puts "End   commit: #{end_sha1}"
+      puts "Start commit: #{start_sha1}"
+      puts "End   commit: #{end_sha1}"
 
-    args = []
-    args << "--ff-only" if fast_forward
-    system git, "merge", *args, "homebrew/master", "-m", "Merge branch homebrew/master into linuxbrew/master"
+      args = []
+      args << "--ff-only" if fast_forward
+      system git, "merge", *args, hbc, "-m", "Merge branch homebrew/master into linuxbrew/master"
+    end
   end
 
   def resolve_conflicts
@@ -147,6 +149,15 @@ module Homebrew
     safe_system git, "log", "--oneline", "--decorate=short", "homebrew/master..master"
     oh1 "Done"
     puts "Now run:\n  git push homebrew && git push origin"
+  end
+
+  def homebrew_commits
+    if ARGV.named.empty?
+      "homebrew/master"
+    else
+      ARGV.named.each { |hbc| safe_system git, "rev-parse", hbc }
+      ARGV.named
+    end
   end
 
   def merge_homebrew
