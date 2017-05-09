@@ -157,7 +157,7 @@ module Homebrew
     if ARGV.named.empty?
       ["homebrew/master"]
     else
-      ARGV.named.each { |hbc| safe_system git, "rev-parse", "--verify", hbc }
+      ARGV.named.each { |sha1| safe_system git, "rev-parse", "--verify", sha1 }
       ARGV.named
     end
   end
