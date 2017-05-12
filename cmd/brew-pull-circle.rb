@@ -4,6 +4,7 @@
 #:    `--ci-upload` Upload the bottles to Bintray using `brew test-bot --ci-upload`
 #:    `--keep-going` Continue  as  much  as  possible after an error
 #:    `--keep-old` Build new bottles for a single platform
+#:    `--overwrite` Overwrite published bottles on Bintray
 
 module Homebrew
   def ci_upload(issue)
@@ -11,6 +12,7 @@ module Homebrew
     args = []
     args << "--keep-going" if ARGV.include? "--keep-going"
     args << "--keep-old" if ARGV.include? "--keep-old"
+    args << "--overwrite" if ARGV.include? "--overwrite"
     system env, HOMEBREW_BREW_FILE, "test-bot", "--ci-upload", *args
   end
 
