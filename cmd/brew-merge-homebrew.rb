@@ -14,7 +14,8 @@ module Homebrew
   def editor
     return @editor if @editor
     @editor = [which_editor]
-    @editor += ["-f", "+/^<<<<"] if editor[0] == "gvim"
+    @editor += ["-f", "+/^<<<<"] if File.basename(editor[0]) == "gvim"
+    @editor
   end
 
   def git
