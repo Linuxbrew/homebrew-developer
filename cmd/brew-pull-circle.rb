@@ -45,9 +45,10 @@ module Homebrew
 
     mkdir "#{tap}/#{issue}" do
       urls.each do |url|
-        puts File.basename(url)
+        filename = File.basename(url).gsub("%25", "%").gsub("%2B", "+").gsub("%40", "@")
+        puts filename
         puts url if ARGV.verbose?
-        curl "-O", url
+        curl "-o", filename, url
       end
       ci_upload issue if ARGV.include? "--ci-upload"
     end
