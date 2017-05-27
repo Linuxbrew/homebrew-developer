@@ -69,15 +69,13 @@ module Homebrew
       next if conflict_files.empty?
       safe_system git, "commit"
       conflicts = conflict_files.map { |s| s.gsub(%r{^Formula/|\.rb$}, "") }
-      message =
-        "Update bottles for merge #{Date.today}\n\n" +
-        conflicts.map { |s| "+ [ ] #{s}\n" }.join
-      Tempfile.open("merge-homebrew-message", HOMEBREW_TEMP) do |f|
-        f.write message
-        f.close
-        safe_system "hub", "issue", "create", "-l", "merge", "-f", f.path
-      end
-      puts "Now run:\n  git push origin\n  brew build-bottle-pr #{conflicts.join(" ")}"
+      message = "Merge #{Date.today}\n\n" + conflicts.map { |s| "+ [ ] #{s}\n" }.join
+      File.write(".git/PULLREQ_EDITMSG", message)
+      remote = ENV["GITHUB_USER"] || ENV["USER"]
+      branch = "merge-#{Date.today}"
+      safe_system git, "push", remote, "HEAD:#{branch}"
+      safe_system "hub", "pull-request", "-f", "-h", "#{remote}:#{branch}",
+        *("--browse" unless ENV["BROWSER"].nil? && ENV["HOMEBREW_BROWSER"].nil?)
     end
   end
 
