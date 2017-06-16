@@ -68,10 +68,11 @@ module Homebrew
       conflict_files = resolve_conflicts
       safe_system git, "commit" unless conflict_files.empty?
       conflicts = conflict_files.map { |s| s.gsub(%r{^Formula/|\.rb$}, "") }
-      message = "Merge #{Date.today}\n\n" + conflicts.map { |s| "+ [ ] #{s}\n" }.join
+      sha1 = Utils.popen_read(git, "rev-parse", "--short", homebrew_commits.last).chomp
+      message = "Merge #{Date.today} #{sha1}\n\n" + conflicts.map { |s| "+ [ ] #{s}\n" }.join
       File.write(".git/PULLREQ_EDITMSG", message)
       remote = ENV["GITHUB_USER"] || ENV["USER"]
-      branch = "merge-#{Date.today}"
+      branch = "merge-#{Date.today}-#{sha1}"
       safe_system git, "push", remote, "HEAD:#{branch}"
       safe_system "hub", "pull-request", "-f", "-h", "#{remote}:#{branch}",
         *("--browse" unless ENV["BROWSER"].nil? && ENV["HOMEBREW_BROWSER"].nil?)
