@@ -22,4 +22,4 @@ Linuxbrew developers' guides and procedures
 
 ## Adding new tools
 
-Read the ["External Commands" Linuxbrew document](https://github.com/Homebrew/brew/blob/master/docs/External-Commands.md) to see how to create Homebrew external commands.
+Read the ["External Commands" Linuxbrew document](https://github.com/Linuxbrew/brew/blob/master/docs/External-Commands.md) to see how to create Homebrew external commands.
