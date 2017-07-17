@@ -1,9 +1,8 @@
-#:  * `merge-homebrew` [`--brew`|`--core`|`--dupes`|`--science`]:
+#:  * `merge-homebrew` [`--brew`|`--core`|`--science`]:
 #:   Merge branch homebrew/master into linuxbrew/master.
 #:
 #:   If `--brew` is passed, merge Homebrew/brew into Linuxbrew/brew.
 #:   If `--core` is passed, merge Homebrew/homebrew-core into Linuxbrew/homebrew-core.
-#:   If `--dupes` is passed, merge Homebrew/homebrew-dupes into Linuxbrew/homebrew-dupes.
 #:   If `--science` is passed, merge Homebrew/homebrew-science into Linuxbrew/homebrew-science.
 
 require "date"
@@ -77,11 +76,6 @@ module Homebrew
       safe_system "hub", "pull-request", "-f", "-h", "#{remote}:#{branch}",
         *("--browse" unless ENV["BROWSER"].nil? && ENV["HOMEBREW_BROWSER"].nil?)
     end
-  end
-
-  def merge_dupes
-    oh1 "Merging Homebrew/homebrew-dupes into Linuxbrew/homebrew-dupes"
-    cd(Tap.fetch("homebrew/dupes").path) { git_merge }
   end
 
   def merge_science
@@ -165,11 +159,10 @@ module Homebrew
 
   def merge_homebrew
     Utils.ensure_git_installed!
-    repos = %w[--brew --core --dupes --science]
+    repos = %w[--brew --core --science]
     odie "Specify one of #{repos.join " "}" if (ARGV & repos).empty?
     merge_brew if ARGV.include? "--brew"
     merge_core if ARGV.include? "--core"
-    merge_dupes if ARGV.include? "--dupes"
     merge_science if ARGV.include? "--science"
   end
 end
