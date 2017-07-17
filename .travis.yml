@@ -3,7 +3,6 @@ matrix:
   include:
     - env: OSX=10.11
       os: osx
-      osx_image: xcode8.0
       rvm: system
     - os: linux
       rvm: 2.0.0
@@ -17,7 +16,7 @@ before_install:
       rm -rf "$(brew --repo $TRAVIS_REPO_SLUG)";
     else
       HOMEBREW="$HOME/.linuxbrew/Homebrew";
-      git clone --depth=1 https://github.com/Homebrew/brew "$HOMEBREW";
+      git clone --depth=1 https://github.com/Linuxbrew/brew "$HOMEBREW";
       export PATH="$HOMEBREW/bin:$PATH";
       umask 022;
     fi
