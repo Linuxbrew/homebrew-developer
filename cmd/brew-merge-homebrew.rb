@@ -1,9 +1,10 @@
-#:  * `merge-homebrew` [`--brew`|`--core`|`--science`]:
+#:  * `merge-homebrew` [`--brew`|`--core`|`--science`] [<commit>]:
 #:   Merge branch homebrew/master into linuxbrew/master.
 #:
 #:   If `--brew` is passed, merge Homebrew/brew into Linuxbrew/brew.
 #:   If `--core` is passed, merge Homebrew/homebrew-core into Linuxbrew/homebrew-core.
 #:   If `--science` is passed, merge Homebrew/homebrew-science into Linuxbrew/homebrew-science.
+#:   If <commit> is passed, merge only up to that upstream SHA-1 commit.
 
 require "date"
 
