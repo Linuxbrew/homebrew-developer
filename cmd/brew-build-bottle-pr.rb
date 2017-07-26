@@ -132,7 +132,7 @@ module Homebrew
         unless Utils.popen_read("git", "branch", "-r", "--list", "#{remote}/#{branch}").empty?
           return odie "#{formula}: Remote branch #{remote}/#{branch} already exists" unless ARGV.force?
           ohai "#{formula}: Removing branch #{branch} from #{remote}" if ARGV.verbose?
-          safe_system "git", "push", "--delete", remote, branch 
+          safe_system "git", "push", "--delete", remote, branch
         end
         safe_system "git", "push", remote, branch
         ohai "#{formula}: Using remote '#{remote}' to submit Pull Request" if ARGV.verbose?
