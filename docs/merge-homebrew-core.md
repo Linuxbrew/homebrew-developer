@@ -50,8 +50,32 @@ Now we are ready to do the merge.
 
 ## The Merge
 
+By default, the following command will attempt to merge all the changes that the upstream Homebrew developers have made.
+
 ```bash
 brew merge-homebrew --core
+```
+
+This is usually undesireable since our build servers will time out. Instead attempt to only merge 8-10 modified formulae.
+
+To do this, find the most recently closed [merge pull request](https://github.com/Linuxbrew/homebrew-core/pulls?q=is%3Apr+is%3Aclosed), usually named "Merge YYYY-MM-DD `sha1`" or similar. Copy down that `sha1` and run:
+
+```bash
+git log --oneline <sha1>..HEAD
+```
+
+This will show all the upstream commits since the last merge, from newest to oldest.
+
+Now, pick a commit ID that will span 8-10 formulae. Confirm the list of changes with:
+
+```bash
+git log --oneline <sha1>..<new_sha1>
+```
+
+Once you're satisfied with the list of updated formulae, begin the merge:
+
+```bash
+brew merge-homebrew --core <new_sha1>
 ```
 
 ## Simple Conflicts
