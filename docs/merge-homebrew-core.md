@@ -58,15 +58,18 @@ brew merge-homebrew --core
 
 This is usually undesireable since our build servers will time out. Instead attempt to only merge 8-10 modified formulae.
 
-To do this, find the most recently closed [merge pull request](https://github.com/Linuxbrew/homebrew-core/pulls?q=is%3Apr+is%3Aclosed), usually named "Merge YYYY-MM-DD `sha1`" or similar. Copy down that `sha1` and run:
+To do this, find the SHA-1 hash of the most recent merge commit from Homebrew/core. This can be found by:
+
+* [Searching on Github](https://github.com/Linuxbrew/homebrew-core/pulls?q=is%3Apr%20is%3Amerged%20Merge%20in%3Atitle)
+* `git log --oneline --min-parents=2 --max-count=5`
+
+Copy down the commit's SHA-1 hash and run the following to show all the upstream changes since that commit, from newest to oldest:
 
 ```bash
 git log --oneline <sha1>..HEAD
 ```
 
-This will show all the upstream commits since the last merge, from newest to oldest.
-
-Now, pick a commit ID that will span 8-10 formulae. Confirm the list of changes with:
+Now, select a new commit's SHA-1 hash that will span 8-10 formulae. Confirm the list of changes with:
 
 ```bash
 git log --oneline <sha1>..<new_sha1>
