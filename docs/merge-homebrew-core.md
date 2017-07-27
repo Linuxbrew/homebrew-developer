@@ -61,7 +61,7 @@ This is usually undesireable since our build servers will time out. Instead atte
 To do this, find the SHA-1 hash of the most recent merge commit from Homebrew/core. This can be found by:
 
 * [Searching on Github](https://github.com/Linuxbrew/homebrew-core/pulls?q=is%3Apr%20is%3Amerged%20Merge%20in%3Atitle)
-* `git log --oneline --min-parents=2 --max-count=5`
+* `git log --oneline --merges -1`
 
 Copy down the commit's SHA-1 hash and run the following to show all the upstream changes since that commit, from newest to oldest:
 
@@ -73,6 +73,12 @@ Now, select a new commit's SHA-1 hash that will span 8-10 formulae. Confirm the 
 
 ```bash
 git log --oneline <sha1>..<new_sha1>
+```
+
+You can also automatically list the commits that correspond to 10 changed formula from the last merge commit with this shell one-liner:
+
+```bash
+git log --oneline $(git rev-list --merges -1 HEAD)..homebrew/master --reverse | perl -paF/[\\W:]/ -e '$a{$F[1]}++; exit if keys %a > 9'
 ```
 
 Once you're satisfied with the list of updated formulae, begin the merge:
