@@ -35,7 +35,8 @@ Once the PR is merged and pushed to master, *don't* tag it yet. Wait a couple of
 Once you're confident that any issues have been sorted out, tag the master branch with the same name as the upstream tag and push that tag.
 
 ```bash
-$ git push origin <tag name>
+$ git tag -f <tag_name>
+$ git push origin <tag_name>
 ```
 
 Also post a message to [the Linuxbrew mailing list](https://github.com/linuxbrew/brew/issues/1) announcing the release, along with any particularly notable changes for Linux users. If there aren't any changes particularly relevant to Linuxbrew, you can just point to upstream Homebrew's release notes.
