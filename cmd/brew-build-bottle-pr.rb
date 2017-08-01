@@ -8,6 +8,7 @@
 #:    If `--dry-run` is passed, do not actually make any PR's.
 #:    If `--verbose` is passed, print extra information.
 #:    If `--force` is passed, delete local and remote 'bottle-<name>' branches if they exist. Use with care.
+#:    If `--browse` is passed, open a web browser for the new pull request.
 
 module Homebrew
   module_function
@@ -89,6 +90,21 @@ module Homebrew
     safe_system "git", "commit", "circle.yml", "-m", "drop! Add --keep-old to circle.yml"
   end
 
+  # Open a pull request using hub.
+  def hub_pull_request remote, branch, message
+    ohai "#{formula}: Using remote '#{remote}' to submit Pull Request" if ARGV.verbose?
+    safe_system "git", "push", remote, branch
+    args = []
+    hub_version = Version.new(Utils.popen_read("hub", "--version")[/hub version ([0-9.]+)/, 1])
+    if hub_version >= Version.new("2.3.0")
+      args += ["-a", ENV["GITHUB_USER"] || ENV["USER"], "-l", "bottle"]
+    else
+      opoo "Please upgrade hub\n  brew upgrade --devel hub"
+    end
+    args << "--browse" if ARGV.include? "--browse"
+    safe_system "hub", "pull-request", "-h", "#{remote}:#{branch}", "-m", message, *args
+  end
+
   # The number of bottled formula.
   @n = 0
 
@@ -134,11 +150,7 @@ module Homebrew
           ohai "#{formula}: Removing branch #{branch} from #{remote}" if ARGV.verbose?
           safe_system "git", "push", "--delete", remote, branch
         end
-        safe_system "git", "push", remote, branch
-        ohai "#{formula}: Using remote '#{remote}' to submit Pull Request" if ARGV.verbose?
-        safe_system "hub", "pull-request",
-          "-h", "#{remote}:#{branch}", "-m", message,
-          *("--browse" unless ENV["BROWSER"].nil? && ENV["HOMEBREW_BROWSER"].nil?)
+        hub_pull_request remote, branch, message
       end
       safe_system "git", "checkout", "master"
       safe_system "git", "branch", "-D", branch
