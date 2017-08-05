@@ -114,6 +114,8 @@ module Homebrew
     remote = tap_dir.cd { determine_remote }
     odie "#{formula}: Failed to determine a remote to use for Pull Request" if remote.nil?
     tag = (ARGV.value("tag") || "x86_64_linux").to_sym
+
+    return ohai "#{formula}: Skipping because it depends on macOS" if depends_on_macos?(formula)
     return ohai "#{formula}: Skipping because a bottle is not needed" if formula.bottle_unneeded?
     return ohai "#{formula}: Skipping because bottles are disabled" if formula.bottle_disabled?
     return ohai "#{formula}: Skipping because it has a bottle already" if formula.bottle_specification.tag?(tag)
@@ -155,6 +157,10 @@ module Homebrew
       safe_system "git", "checkout", "master"
       safe_system "git", "branch", "-D", branch
     end
+  end
+
+  def depends_on_macos?(formula)
+    formula.requirements.any? { |req| req.instance_of? MacOSRequirement }
   end
 
   def shell(cmd)
