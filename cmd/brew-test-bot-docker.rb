@@ -15,9 +15,19 @@ module Homebrew
     safe_system "docker", "run", "--name=linuxbrew-test-bot",
       "-e", "BINTRAY_USER", "-e", "BINTRAY_KEY",
       "linuxbrew/linuxbrew",
-      "sh", "-c", "brew test-bot #{argv} && ls && brew test-bot --ci-upload && head *.json"
+      "sh", "-c", <<-EOS.undent
+        sudo apt-get install -y python
+        mkdir linuxbrew-test-bot
+        cd linuxbrew-test-bot
+        brew test-bot #{argv}
+        status=$?
+        ls
+        brew test-bot --ci-upload
+        head *.json
+        exit $status
+        EOS
 
-    safe_system "docker", "cp", "linuxbrew-test-bot:/home/linuxbrew", "linuxbrew-test-bot"
+    safe_system "docker", "cp", "linuxbrew-test-bot:/home/linuxbrew/linuxbrew-test-bot", "."
     cd "linuxbrew-test-bot" do
       safe_system HOMEBREW_BREW_FILE, "bottle", "--merge", "--write", *Dir["*.json"]
     end
