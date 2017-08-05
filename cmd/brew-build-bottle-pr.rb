@@ -91,7 +91,7 @@ module Homebrew
   end
 
   # Open a pull request using hub.
-  def hub_pull_request remote, branch, message
+  def hub_pull_request formula, remote, branch, message
     ohai "#{formula}: Using remote '#{remote}' to submit Pull Request" if ARGV.verbose?
     safe_system "git", "push", remote, branch
     args = []
@@ -150,7 +150,7 @@ module Homebrew
           ohai "#{formula}: Removing branch #{branch} from #{remote}" if ARGV.verbose?
           safe_system "git", "push", "--delete", remote, branch
         end
-        hub_pull_request remote, branch, message
+        hub_pull_request formula, remote, branch, message
       end
       safe_system "git", "checkout", "master"
       safe_system "git", "branch", "-D", branch
