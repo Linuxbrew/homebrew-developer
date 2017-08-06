@@ -3,6 +3,8 @@
 #:   If `--pull` is passed, pull a fresh image from Docker Hub.
 
 module Homebrew
+  module_function
+
   def travis_debug
     odie 'Please run "brew install docker".' unless which "docker"
     image_tag = "linuxbrew/travis"
