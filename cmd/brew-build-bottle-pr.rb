@@ -10,6 +10,8 @@
 #:    If `--force` is passed, delete local and remote 'bottle-<name>' branches if they exist. Use with care.
 #:    If `--browse` is passed, open a web browser for the new pull request.
 
+require "English"
+
 module Homebrew
   module_function
 
@@ -91,7 +93,7 @@ module Homebrew
   end
 
   # Open a pull request using hub.
-  def hub_pull_request formula, remote, branch, message
+  def hub_pull_request(formula, remote, branch, message)
     ohai "#{formula}: Using remote '#{remote}' to submit Pull Request" if ARGV.verbose?
     safe_system "git", "push", remote, branch
     args = []
@@ -126,7 +128,7 @@ module Homebrew
     return ohai "#{formula}: Skipping because GitHub rate limits pull requests (limit = #{limit})." if @n > limit
 
     system HOMEBREW_BREW_FILE, "audit", "--online", formula.path
-    opoo "Please fix audit failure for #{formula}" unless $?.success?
+    opoo "Please fix audit failure for #{formula}" unless $CHILD_STATUS.success?
 
     message = "#{formula}: Build a bottle for Linuxbrew"
     oh1 "#{@n}. #{message}"
@@ -168,7 +170,7 @@ module Homebrew
 
   def shell(cmd)
     output = `#{cmd}`
-    raise ErrorDuringExecution, cmd unless $?.success?
+    raise ErrorDuringExecution, cmd unless $CHILD_STATUS.success?
     output
   end
 
