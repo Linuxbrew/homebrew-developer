@@ -161,6 +161,9 @@ module Homebrew
 
   def depends_on_macos?(formula)
     formula.requirements.any? { |req| req.instance_of? MacOSRequirement }
+  rescue
+    # MacOSRequirement is not defined in upstream brew
+    false
   end
 
   def shell(cmd)
