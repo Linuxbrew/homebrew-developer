@@ -163,7 +163,7 @@ module Homebrew
 
   def depends_on_macos?(formula)
     formula.requirements.any? { |req| req.instance_of? MacOSRequirement }
-  rescue
+  rescue NameError
     # MacOSRequirement is not defined in upstream brew
     false
   end
