@@ -298,7 +298,7 @@ module Homebrew
       extra_msg = @description ? "(#{@description})" : nil
       ohai "Fetching patch #{extra_msg}"
       puts "Patch: #{patch_url}"
-      curl patch_url, "-s", "-L", "-o", patchpath
+      curl_download patch_url, "--silent", to: patchpath
     end
 
     def apply_patch
@@ -579,7 +579,7 @@ module Homebrew
         # We're in the cache; make sure to force re-download
         loop do
           begin
-            curl url, "-o", filename
+            curl_download url, to: filename
             break
           rescue
             if retry_count >= max_curl_retries
