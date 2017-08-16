@@ -17,6 +17,7 @@ module Homebrew
       "linuxbrew/linuxbrew",
       "sh", "-c", <<-EOS.undent
         sudo apt-get install -y python
+        brew tap linuxbrew/homebrew-org
         mkdir linuxbrew-test-bot
         cd linuxbrew-test-bot
         brew test-bot #{argv}
