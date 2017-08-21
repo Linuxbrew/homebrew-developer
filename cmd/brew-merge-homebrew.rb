@@ -4,6 +4,9 @@
 #:   If `--brew` is passed, merge Homebrew/brew into Linuxbrew/brew.
 #:   If `--core` is passed, merge Homebrew/homebrew-core into Linuxbrew/homebrew-core.
 #:   If <commit> is passed, merge only up to that upstream SHA-1 commit.
+#:
+#:   If HOMEBREW_MERGETOOL is set, run "git mergetool" instead of opening conflicting
+#:   files in an editor.
 
 require "date"
 
@@ -48,7 +51,11 @@ module Homebrew
     return conflicts if conflicts.empty?
     oh1 "Conflicts"
     puts conflicts.join(" ")
-    safe_system *editor, *conflicts
+    unless ENV["HOMEBREW_MERGETOOL"].nil?
+      safe_system "git", "mergetool"
+    else
+      safe_system *editor, *conflicts
+    end
     safe_system HOMEBREW_BREW_FILE, "style", *conflicts
     safe_system git, "diff", "--check"
     safe_system git, "add", "--", *conflicts
