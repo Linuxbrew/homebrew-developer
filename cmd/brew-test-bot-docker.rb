@@ -16,6 +16,8 @@ module Homebrew
       "-e", "BINTRAY_USER", "-e", "BINTRAY_KEY",
       "linuxbrew/linuxbrew",
       "sh", "-c", <<-EOS.undent
+        git config --global user.name LinuxbrewTestBot
+        git config --global user.email testbot@linuxbrew.sh
         sudo apt-get install -y python
         brew tap linuxbrew/xorg
         mkdir linuxbrew-test-bot
