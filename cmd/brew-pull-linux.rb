@@ -298,7 +298,7 @@ module Homebrew
       extra_msg = @description ? "(#{@description})" : nil
       ohai "Fetching patch #{extra_msg}"
       puts "Patch: #{patch_url}"
-      curl patch_url, "-s", "-o", patchpath
+      curl patch_url, "-s", "-L", "-o", patchpath
     end
 
     def apply_patch
