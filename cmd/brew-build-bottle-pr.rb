@@ -83,13 +83,13 @@ module Homebrew
     end
   end
 
-  # Add --keep-old to circle.yml
+  # Add --keep-old to the CircleCI configuration.
   def keep_old
-    Utils::Inreplace.inreplace("circle.yml") do |s|
+    Utils::Inreplace.inreplace(".circleci/config.yml") do |s|
       s.sub! /brew test-bot$/, "brew test-bot --keep-old"
       s.sub! /ci-upload$/, "ci-upload?keep-old=1"
     end
-    safe_system "git", "commit", "circle.yml", "-m", "drop! Add --keep-old to circle.yml"
+    safe_system "git", "commit", ".circleci/config.yml", "-m", "drop! CircleCI: Add --keep-old [Linux]"
   end
 
   # Open a pull request using hub.
