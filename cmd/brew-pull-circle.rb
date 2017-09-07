@@ -43,7 +43,8 @@ module Homebrew
     puts api_url if ARGV.verbose?
     output, _errors, _status = curl_output api_url
     json = JSON.parse output
-    urls = json.map { |x| x["url"] }
+    odie json["message"] if json.is_a? Hash
+    urls = json.map { |x| x["url"] }.uniq
 
     mkdir "#{tap}/#{issue}" do
       urls.each do |url|
