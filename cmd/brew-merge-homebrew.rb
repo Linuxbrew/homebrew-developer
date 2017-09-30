@@ -21,8 +21,8 @@ module Homebrew
     @git ||= Utils.git_path
   end
 
-  def has_mergetool?
-    @mergetool ||= system "git config merge.tool >/dev/null 2>/dev/null"
+  def mergetool?
+    @mergetool = system "git config merge.tool >/dev/null 2>/dev/null" if @mergetool.nil?
   end
 
   def git_merge_commit(sha1, fast_forward: false)
@@ -52,7 +52,7 @@ module Homebrew
     return conflicts if conflicts.empty?
     oh1 "Conflicts"
     puts conflicts.join(" ")
-    if has_mergetool?
+    if mergetool?
       safe_system "git", "mergetool"
     else
       safe_system *editor, *conflicts
