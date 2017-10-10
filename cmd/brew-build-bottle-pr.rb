@@ -28,7 +28,7 @@ module Homebrew
   end
 
   def open_pull_request?(formula)
-    prs = GitHub.issues_matching(formula,
+    prs = GitHub.issues_for_formula(formula,
       type: "pr", state: "open", repo: slug(formula.tap))
     prs = prs.select { |pr| pr["title"].start_with? "#{formula}: " }
     if prs.any?
