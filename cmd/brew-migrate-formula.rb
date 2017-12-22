@@ -1,14 +1,14 @@
 #:  * `migrate-formula` [--remote=<remote>] [--tap=<tap>] <formulae>:
 #:    Migrate formulae to a new tap.
 #:
-#:    --remote=<remote> Use this GitHub remote, or $GITHUB_USER or $USER.
+#:    --remote=<remote> Use this GitHub remote, or $HOMEBREW_GITHUB_USER or $USER.
 #:    --tap=<tap> Move formulae to this tap.
 
 module Homebrew
   module_function
 
   def remote
-    ARGV.value("remote") || ENV["GITHUB_USER"] || ENV["USER"]
+    ARGV.value("remote") || ENV["HOMEBREW_GITHUB_USER"] || ENV["USER"]
   end
 
   def open_pull_request?(formula, tap)

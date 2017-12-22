@@ -2,7 +2,7 @@
 #:    Submit a pull request to build a bottle for a formula.
 #:
 #:    If `--remote` is passed, use the specified GitHub remote.
-#:      Otherwise, check $GITHUB_USER followed by $USER.
+#:      Otherwise, check $HOMEBREW_GITHUB_USER followed by $USER.
 #:    If `--tag` is passed, use the specified bottle tag. Defaults to x86_64_linux.
 #:    If `--limit` is passed, make at most the specified number of PR's at once. Defaults to 10.
 #:    If `--dry-run` is passed, do not actually make any PR's.
@@ -50,14 +50,14 @@ module Homebrew
       return ARGV.value("remote") if remotes.include?(ARGV.value("remote"))
       onoe "No remote '#{ARGV.value("remote")}' was found in #{Dir.pwd}"
     else
-      # Check GITHUB_USER and USER remotes
-      [ENV["GITHUB_USER"], ENV["USER"]].each { |n| return n if remotes.include? n }
+      # Check HOMEBREW_GITHUB_USER and USER remotes
+      [ENV["HOMEBREW_GITHUB_USER"], ENV["USER"]].each { |n| return n if remotes.include? n }
 
       # Nothing worked
       onoe "Please provide a valid remote name to use for Pull Requests"
       onoe "You can do so:"
       onoe " * on the command line via --remote=NAME"
-      onoe " * by setting GITHUB_USER env. variable"
+      onoe " * by setting HOMEBREW_GITHUB_USER env. variable"
       onoe " * or by having a remote named as your USER env. variable"
     end
 
@@ -99,7 +99,7 @@ module Homebrew
     args = []
     hub_version = Version.new(Utils.popen_read("hub", "--version")[/hub version ([0-9.]+)/, 1])
     if hub_version >= Version.new("2.3.0")
-      args += ["-a", ENV["GITHUB_USER"] || ENV["USER"], "-l", "bottle"]
+      args += ["-a", ENV["HOMEBREW_GITHUB_USER"] || ENV["USER"], "-l", "bottle"]
     else
       opoo "Please upgrade hub\n  brew upgrade --devel hub"
     end
