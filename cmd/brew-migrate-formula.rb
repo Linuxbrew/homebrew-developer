@@ -33,7 +33,12 @@ module Homebrew
     safe_system HOMEBREW_BREW_FILE, "audit", "--new-formula", formula.full_name unless ARGV.include? "--skip-audit"
 
     contents = formula.path.read
-    contents = contents.lines.reject { |s| /# (doi|tag)/ =~ s }.join
+    if tap.user.downcase == "homebrew"
+      contents.sub!(/^  # doi .+?\n/m, "")
+    else
+      contents.sub!(/^  # doi /, "  # cite ")
+    end
+    contents.sub!(/^  # tag .+?\n/m, "")
     contents.sub!(/  bottle do.+?end\n\n?/m, "")
     dest.write contents
 
