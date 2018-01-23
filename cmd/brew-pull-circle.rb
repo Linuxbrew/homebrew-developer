@@ -5,17 +5,25 @@
 #:    `--keep-going` Continue  as  much  as  possible after an error
 #:    `--keep-old` Build new bottles for a single platform
 #:    `--overwrite` Overwrite published bottles on Bintray
+#:    `--bintray-org=<bintray-org>` Upload to the given Bintray organisation.
+#:    `--git-name=<git-name>` Set the Git author/committer names to the given name.
+#:    `--git-email=<git-email>` Set the Git author/committer email to the given email.
 
 module Homebrew
   module_function
 
   def ci_upload(issue)
     env = { "CIRCLE_PR_NUMBER" => issue }
+    bintray_org = ARGV.value("bintray-org") || "linuxbrew"
+    git_name = ARGV.value("git-name") || "LinuxbrewTestBot"
+    git_email= ARGV.value("git-email") || "testbot@linuxbrew.sh"
     args = []
     args << "--keep-going" if ARGV.include? "--keep-going"
     args << "--keep-old" if ARGV.include? "--keep-old"
     args << "--overwrite" if ARGV.include? "--overwrite"
-    system env, HOMEBREW_BREW_FILE, "test-bot", "--ci-upload", *args
+    system env, HOMEBREW_BREW_FILE, "test-bot", "--ci-upload",
+      "--bintray-org=#{bintray_org}", "--git-name=#{git_name}", "--git-email=#{git_email}",
+      *args
   end
 
   # The GitHub slug of the {Tap}.
