@@ -37,7 +37,7 @@ module Homebrew
     safe_system HOMEBREW_BREW_FILE, "audit", "--new-formula", formula.full_name unless ARGV.include? "--skip-audit"
 
     contents = formula.path.read
-    if tap.user.downcase == "homebrew"
+    if tap.user == "homebrew"
       contents.sub!(/^  # doi .+?\n/m, "")
     else
       contents.sub!(/^  # doi /, "  # cite ")
