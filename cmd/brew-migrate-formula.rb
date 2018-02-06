@@ -26,7 +26,11 @@ module Homebrew
     dest = Pathname.new "#{tap.formula_dir}/#{formula.name}.rb"
     ohai "Migrating #{formula.full_name} to #{tap}"
     odie "Source and destination tap are the same." if formula.tap == tap
-    odie "Destination already exists: #{dest}" if dest.exist?
+    unless Utils.popen_read("git", "ls-files", dest).empty?
+      opoo "Skipping new formula PR because formula already exists: #{dest}"
+      return
+    end
+    odie "Formula already exists: #{dest}" if dest.exist?
 
     safe_system HOMEBREW_BREW_FILE, "style", formula.full_name unless ARGV.include? "--skip-style"
     safe_system HOMEBREW_BREW_FILE, "install", "-s", formula.full_name unless ARGV.include? "--skip-install"
@@ -70,13 +74,10 @@ module Homebrew
       safe_system "git", "pull", "--ff-only"
       safe_system "git", "checkout", "-b", branch
       safe_system "git", "rm", formula.path.basename
-      message = <<~EOS
-        #{formula.name}: migrate to #{tap}
+      message = "#{formula.name}: migrate to #{tap}\n"
+      message += "\nSee #{add_pr}\n" if add_pr
 
-        See #{add_pr}
-      EOS
-
-      if tap.user == "homebrew"
+      if tap.user == "homebrew" || tap.user == formula.tap.user
         tap_migrations_path = formula.tap.path/"tap_migrations.json"
         tap_migrations = tap_migrations_path.readlines.each &:chomp!
         tap_migrations.reject! { |s| %w[{ }].include? s }
