@@ -62,7 +62,7 @@ module Homebrew
       message = "#{formula.name}: import from #{formula.tap}"
       safe_system "git", "commit", "-m", message, dest.basename
       safe_system "git", "push", remote, branch
-      add_pr = Utils.popen_read "hub", "pull-request", err: :err
+      add_pr = Utils.popen_read "hub", "pull-request", "-m", message, err: :err
       odie "hub pull-request failed" unless $CHILD_STATUS.success?
       puts add_pr
       safe_system "git", "checkout", "master"
@@ -95,7 +95,7 @@ module Homebrew
 
       safe_system "git", "commit", "-m", message
       safe_system "git", "push", remote, branch
-      safe_system "hub", "pull-request", "-a", remote, "-l", "migration"
+      safe_system "hub", "pull-request", "-a", remote, "-l", "migration", "-m", message
       safe_system "git", "checkout", "master"
       safe_system "git", "branch", "-D", branch
     end
