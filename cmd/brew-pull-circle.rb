@@ -59,7 +59,11 @@ module Homebrew
         filename = File.basename(url).gsub("%25", "%").gsub("%2B", "+").gsub("%40", "@")
         puts filename
         puts url if ARGV.verbose?
-        curl "-o", filename, url
+        if File.readable? filename
+          opoo "Skipping existing file: #{filename}"
+        else
+          curl "-o", filename, url
+        end
       end
       ci_upload issue if ARGV.include? "--ci-upload"
     end
