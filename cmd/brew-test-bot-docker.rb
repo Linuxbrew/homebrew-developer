@@ -15,7 +15,7 @@ module Homebrew
     safe_system "docker", "run", "--name=linuxbrew-test-bot",
       "-e", "HOMEBREW_BINTRAY_USER", "-e", "HOMEBREW_BINTRAY_KEY",
       "linuxbrew/linuxbrew",
-      "sh", "-c", <<-EOS.undent
+      "sh", "-c", <<~EOS
         git config --global user.name LinuxbrewTestBot
         git config --global user.email testbot@linuxbrew.sh
         sudo apt-get install -y python
@@ -36,7 +36,7 @@ module Homebrew
     end
 
     oh1 "Done!"
-    puts <<-EOS.undent
+    puts <<~EOS
       To clean up, run
         docker rm linuxbrew-test-bot
         rm -rf linuxbrew-test-bot
