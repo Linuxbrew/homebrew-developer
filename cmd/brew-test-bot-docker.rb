@@ -18,7 +18,6 @@ module Homebrew
       "sh", "-c", <<~EOS
         git config --global user.name LinuxbrewTestBot
         git config --global user.email testbot@linuxbrew.sh
-        sudo apt-get install -y python
         brew tap linuxbrew/xorg
         mkdir linuxbrew-test-bot
         cd linuxbrew-test-bot
