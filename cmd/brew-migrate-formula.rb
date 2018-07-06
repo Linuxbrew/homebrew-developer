@@ -26,7 +26,7 @@ module Homebrew
     dest = Pathname.new "#{tap.formula_dir}/#{formula.name}.rb"
     ohai "Migrating #{formula.full_name} to #{tap}"
     odie "Source and destination tap are the same." if formula.tap == tap
-    unless Utils.popen_read("git", "ls-files", dest).empty?
+    unless Utils.popen_read("git", "-C", tap.path, "ls-files", dest).empty?
       opoo "Skipping new formula PR because formula already exists: #{dest}"
       return
     end
