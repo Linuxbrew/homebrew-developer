@@ -57,17 +57,19 @@ module Homebrew
     urls = json.map { |x| x["url"] }.uniq
 
     FileUtils::mkdir_p "#{tap}/#{issue}"
-    urls.each do |url|
-      filename = File.basename(url).gsub("%25", "%").gsub("%2B", "+").gsub("%40", "@")
-      puts filename
-      puts url if ARGV.verbose?
-      if File.readable? filename
-        opoo "Skipping existing file: #{filename}"
-      else
-        curl "-o", filename, url
+    FileUtils::cd "#{tap}/#{issue}" do
+      urls.each do |url|
+        filename = File.basename(url).gsub("%25", "%").gsub("%2B", "+").gsub("%40", "@")
+        puts filename
+        puts url if ARGV.verbose?
+        if File.readable? filename
+          opoo "Skipping existing file: #{filename}"
+        else
+          curl "-o", filename, url
+        end
       end
+      ci_upload issue if ARGV.include? "--ci-upload"
     end
-    ci_upload issue if ARGV.include? "--ci-upload"
   end
 
   def pull_circle
