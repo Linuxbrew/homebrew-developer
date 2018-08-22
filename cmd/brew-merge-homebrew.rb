@@ -3,6 +3,7 @@
 #:
 #:   If `--brew` is passed, merge Homebrew/brew into Linuxbrew/brew.
 #:   If `--core` is passed, merge Homebrew/homebrew-core into Linuxbrew/homebrew-core.
+#:   If `--skip-style` is passed, skip running brew style.
 #:   If <commit> is passed, merge only up to that upstream SHA-1 commit.
 
 require "date"
@@ -57,7 +58,7 @@ module Homebrew
     else
       safe_system *editor, *conflicts
     end
-    safe_system HOMEBREW_BREW_FILE, "style", *conflicts
+    safe_system HOMEBREW_BREW_FILE, "style", *conflicts unless ARGV.include? "--skip-style"
     safe_system git, "diff", "--check"
     safe_system git, "add", "--", *conflicts
     conflicts
