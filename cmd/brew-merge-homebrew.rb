@@ -69,6 +69,18 @@ module Homebrew
     cd(HOMEBREW_REPOSITORY) { git_merge }
   end
 
+  # Open a pull request using hub.
+  def hub_pull_request(branch, message)
+    hub_version = Utils.popen_read("hub", "--version")[/hub version ([0-9.]+)/, 1]
+    odie "Please install hub\n  brew install hub" unless hub_version
+    odie "Please upgrade hub\n  brew upgrade hub" if Version.new(hub_version) < "2.3.0"
+    remote = ENV["HOMEBREW_GITHUB_USER"] || ENV["USER"]
+    safe_system git, "push", remote, "HEAD:#{branch}"
+    safe_system "hub", "pull-request", "-f", "-h", "#{remote}:#{branch}", "-m", message,
+      "-a", remote, "-l", "merge",
+      *("--browse" if ARGV.include? "--browse")
+  end
+
   def merge_core
     oh1 "Merging Homebrew/homebrew-core into Linuxbrew/homebrew-core"
     cd(CoreTap.instance.path) do
@@ -77,13 +89,9 @@ module Homebrew
       safe_system git, "commit" unless conflict_files.empty?
       conflicts = conflict_files.map { |s| s.gsub(%r{^Formula/|\.rb$}, "") }
       sha1 = Utils.popen_read(git, "rev-parse", "--short", homebrew_commits.last).chomp
-      message = "Merge #{Date.today} #{sha1}\n\n" + conflicts.map { |s| "+ [ ] #{s}\n" }.join
-      File.write(".git/PULLREQ_EDITMSG", message)
-      remote = ENV["HOMEBREW_GITHUB_USER"] || ENV["USER"]
       branch = "merge-#{Date.today}-#{sha1}"
-      safe_system git, "push", remote, "HEAD:#{branch}"
-      safe_system "hub", "pull-request", "-f", "-h", "#{remote}:#{branch}",
-        *("--browse" unless ENV["BROWSER"].nil? && ENV["HOMEBREW_BROWSER"].nil?)
+      message = "Merge #{Date.today} #{sha1}\n\n" + conflicts.map { |s| "+ [ ] #{s}\n" }.join
+      hub_pull_request branch, message
     end
   end
 
