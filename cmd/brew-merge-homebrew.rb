@@ -1,8 +1,9 @@
-#:  * `merge-homebrew` [`--brew`|`--core`] [<commit>]:
-#:   Merge branch homebrew/master into linuxbrew/master.
+#:  * `merge-homebrew` [`--brew`|`--core`|`--tap=user/repo`] [<commit>]:
+#:   Merge branch homebrew/master into origin/master.
 #:
 #:   If `--brew` is passed, merge Homebrew/brew into Linuxbrew/brew.
 #:   If `--core` is passed, merge Homebrew/homebrew-core into Linuxbrew/homebrew-core.
+#:   If `--tap=user/repo` is passed, merge Homebrew/tap into user/tap.
 #:   If `--skip-style` is passed, skip running brew style.
 #:   If <commit> is passed, merge only up to that upstream SHA-1 commit.
 
@@ -69,6 +70,11 @@ module Homebrew
     cd(HOMEBREW_REPOSITORY) { git_merge }
   end
 
+  def merge_tap(tap)
+    oh1 "Merging Homebrew/#{tap.repo} into #{tap.name.capitalize}"
+    cd(Tap.fetch(tap).path) { git_merge }
+  end
+
   # Open a pull request using hub.
   def hub_pull_request(branch, message)
     hub_version = Utils.popen_read("hub", "--version")[/hub version ([0-9.]+)/, 1]
@@ -106,10 +112,13 @@ module Homebrew
 
   def merge_homebrew
     Utils.ensure_git_installed!
-    repos = %w[--brew --core]
-    odie "Specify one of #{repos.join " "}" if (ARGV & repos).empty?
+    tap = ARGV.value "tap"
+    repo_options = %w[--brew --core]
+    repos = ARGV & repo_options
+    odie "Specify one of #{repo_options.join " "}" if !tap && repos.empty?
     merge_brew if ARGV.include? "--brew"
     merge_core if ARGV.include? "--core"
+    merge_tap tap if tap
   end
 end
 
