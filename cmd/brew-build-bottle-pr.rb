@@ -127,7 +127,7 @@ module Homebrew
     @n += 1
     return ohai "#{formula}: Skipping because GitHub rate limits pull requests (limit = #{limit})." if @n > limit
 
-    system HOMEBREW_BREW_FILE, "audit", "--online", formula.path
+    system HOMEBREW_BREW_FILE, "audit", formula.path
     opoo "Please fix audit failure for #{formula}" unless $CHILD_STATUS.success?
 
     message = "#{formula}: Build a bottle for Linuxbrew"
