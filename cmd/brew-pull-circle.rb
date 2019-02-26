@@ -30,7 +30,7 @@ module Homebrew
 
   # The GitHub slug of the {Tap}.
   # Not simply "#{user}/homebrew-#{repo}", because the slug of homebrew/core
-  # may be either Homebrew/homebrew-core or Linuxbrew/homebrew-core.
+  # may be either Homebrew/homebrew-core or Homebrew/linuxbrew-core.
   def slug(tap)
     if tap.remote.nil?
       "#{tap.user}/homebrew-#{tap.repo}"
@@ -43,7 +43,7 @@ module Homebrew
   def pull(arg)
     if (url_match = arg.match HOMEBREW_PULL_OR_COMMIT_URL_REGEX)
       _url, user, repo, issue = *url_match
-      tap = Tap.fetch(user, repo) if repo.start_with?("homebrew-")
+      tap = Tap.fetch(user, repo) if repo.match?(HOMEBREW_OFFICIAL_REPO_PREFIXES_REGEX)
     else
       odie "Not a GitHub pull request or commit: #{arg}"
     end
