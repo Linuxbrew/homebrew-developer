@@ -17,7 +17,7 @@ module Homebrew
 
   # The GitHub slug of the {Tap}.
   # Not simply "#{user}/homebrew-#{repo}", because the slug of homebrew/core
-  # may be either Homebrew/homebrew-core or Linuxbrew/homebrew-core.
+  # may be either Homebrew/homebrew-core or Homebrew/linuxbrew-core.
   def slug(tap)
     if tap.remote.nil?
       "#{tap.user}/homebrew-#{tap.repo}"
@@ -121,7 +121,7 @@ module Homebrew
     return ohai "#{formula}: Skipping because a bottle is not needed" if formula.bottle_unneeded?
     return ohai "#{formula}: Skipping because bottles are disabled" if formula.bottle_disabled?
     return ohai "#{formula}: Skipping because it has a bottle already" if formula.bottle_specification.tag?(tag)
-    return ohai "#{formula}: Skipping because #{tap} does not support Linux" if slug(tap)[/^Homebrew/] && tap.repo != "science"
+    return ohai "#{formula}: Skipping because #{tap} does not support Linux" if slug(tap)[/^Homebrew/] && tap.repo != "science" && !slug(tap).sub(/^Homebrew\//, '').match?(HOMEBREW_OFFICIAL_REPO_PREFIXES_REGEX)
     return if open_pull_request? formula
 
     @n += 1
