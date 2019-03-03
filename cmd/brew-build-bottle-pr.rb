@@ -16,15 +16,13 @@ module Homebrew
   module_function
 
   # The GitHub slug of the {Tap}.
-  # Not simply "#{user}/homebrew-#{repo}", because the slug of homebrew/core
-  # may be either Homebrew/homebrew-core or Linuxbrew/homebrew-core.
+  # Not simply tap.full_name, because the slug of homebrew/core
+  # may be either Homebrew/homebrew-core or Homebrew/linuxbrew-core.
   def slug(tap)
-    if tap.remote.nil?
-      "#{tap.user}/homebrew-#{tap.repo}"
-    else
-      x = tap.remote[%r{^https://github\.com/([^.]+)(\.git)?$}, 1]
-      (tap.official? && !x.nil?) ? x.capitalize : x
-    end
+    return tap.full_name unless tap.remote
+
+    x = tap.remote[%r{^https://github\.com/([^.]+)(\.git)?$}, 1]
+    (tap.official? && !x.nil?) ? x.capitalize : x
   end
 
   def open_pull_request?(formula)
@@ -121,7 +119,7 @@ module Homebrew
     return ohai "#{formula}: Skipping because a bottle is not needed" if formula.bottle_unneeded?
     return ohai "#{formula}: Skipping because bottles are disabled" if formula.bottle_disabled?
     return ohai "#{formula}: Skipping because it has a bottle already" if formula.bottle_specification.tag?(tag)
-    return ohai "#{formula}: Skipping because #{tap} does not support Linux" if slug(tap)[/^Homebrew/] && tap.repo != "science"
+    return ohai "#{formula}: Skipping because #{tap} does not support Linux" if slug(tap) == "Homebrew/homebrew-core"
     return if open_pull_request? formula
 
     @n += 1
