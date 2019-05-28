@@ -148,9 +148,9 @@ module Homebrew
       File.open(formula.path, "r+") do |f|
         s = f.read
         f.rewind
-        f.write "# #{message}\n#{s}" unless ARGV.dry_run?
+        f.write "# #{message}\n#{s}" if ARGV.value("dry_run").nil?
       end
-      unless ARGV.dry_run?
+      if ARGV.value("dry_run").nil?
         keep_old if ARGV.include? "--keep-old"
         safe_system "git", "commit", formula.path, "-m", message
         unless Utils.popen_read("git", "branch", "-r", "--list", "#{remote}/#{branch}").empty?
