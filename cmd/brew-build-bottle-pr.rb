@@ -128,8 +128,14 @@ module Homebrew
     system HOMEBREW_BREW_FILE, "audit", formula.path
     opoo "Please fix audit failure for #{formula}" unless $CHILD_STATUS.success?
 
-    message = "#{formula}: Build a bottle for Linuxbrew"
-    oh1 "#{@n}. #{message}"
+    title = "#{formula}: Build a bottle for Linuxbrew"
+    message = <<~EOS
+      #{title}
+
+      This is an automated pull request to build a new bottle for linuxbrew-core
+      based on the existing bottle block from homebrew-core.
+    EOS
+    oh1 "#{@n}. #{title}"
 
     branch = "bottle-#{formula}"
     cd tap_dir do
