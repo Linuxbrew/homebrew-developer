@@ -148,7 +148,7 @@ module Homebrew
       File.open(formula.path, "r+") do |f|
         s = f.read
         f.rewind
-        f.write "# #{message}\n#{s}" if ARGV.value("dry_run").nil?
+        f.write "# #{title}\n#{s}" if ARGV.value("dry_run").nil?
       end
       if ARGV.value("dry_run").nil?
         keep_old if ARGV.include? "--keep-old"
