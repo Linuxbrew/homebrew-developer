@@ -26,7 +26,7 @@ module Homebrew
 
     git_editor = ENV["GIT_EDITOR"]
     ENV["GIT_EDITOR"] = "sed -n -i -e 's/.*#{marker}//p;s/^    //p'"
-    safe_system "git", "commit", file
+    safe_system "git", "-c", "commit.verbose=false", "commit", file
     ENV["GIT_EDITOR"] = git_editor
 
     safe_system "git", "show" if ARGV.verbose?
