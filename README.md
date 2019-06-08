@@ -7,7 +7,6 @@ Tools for Linuxbrew developers
 + **pull-bottle**: Merge a pull request and update both the Mac and Linux bottles
 + **pull-linux**: Merge a pull request and update the Linuxbrew bottle
 + **squash-bottle-pr**: Squash the last two commits created by build-bottle-pr
-+ **travis-debug**: Debug a failing formula on Travis CI
 
 ## Installation
 
