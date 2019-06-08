@@ -24,9 +24,10 @@ module Homebrew
     safe_system "sed", "-iorig", "-e", "/^#.*: #{marker}$/d", file
     rm_f file.to_s + "orig"
 
+    author = Utils.popen_read("git", "log", "-n1", "--format=%an <%ae>", "HEAD~1").chomp
     git_editor = ENV["GIT_EDITOR"]
     ENV["GIT_EDITOR"] = "sed -n -i -e 's/.*#{marker}//p;s/^    //p'"
-    safe_system "git", "-c", "commit.verbose=false", "commit", file
+    safe_system "git", "-c", "commit.verbose=false", "commit", "--author", author, file
     ENV["GIT_EDITOR"] = git_editor
 
     safe_system "git", "show" if ARGV.verbose?
