@@ -1,8 +1,7 @@
-#:  * `merge-homebrew` [`--brew`|`--core`|`--tap=user/repo`] [<commit>]:
+#:  * `merge-homebrew` [`--core`|`--tap=user/repo`] [<commit>]:
 #:   Merge branch homebrew/master into origin/master.
 #:
-#:   If `--brew` is passed, merge Homebrew/brew into Linuxbrew/brew.
-#:   If `--core` is passed, merge Homebrew/homebrew-core into Linuxbrew/homebrew-core.
+#:   If `--core` is passed, merge Homebrew/homebrew-core into Homebrew/linuxbrew-core.
 #:   If `--tap=user/repo` is passed, merge Homebrew/tap into user/tap.
 #:   If `--skip-style` is passed, skip running brew style.
 #:   If <commit> is passed, merge only up to that upstream SHA-1 commit.
@@ -65,11 +64,6 @@ module Homebrew
     conflicts
   end
 
-  def merge_brew
-    oh1 "Merging Homebrew/brew into Linuxbrew/brew"
-    cd(HOMEBREW_REPOSITORY) { git_merge }
-  end
-
   def merge_tap(tap)
     oh1 "Merging Homebrew/#{tap.repo} into #{tap.name.capitalize}"
     cd(Tap.fetch(tap).path) { git_merge }
@@ -88,7 +82,7 @@ module Homebrew
   end
 
   def merge_core
-    oh1 "Merging Homebrew/homebrew-core into Linuxbrew/homebrew-core"
+    oh1 "Merging Homebrew/homebrew-core into Homebrew/linuxbrew-core"
     cd(CoreTap.instance.path) do
       git_merge
       conflict_files = resolve_conflicts
@@ -113,10 +107,8 @@ module Homebrew
   def merge_homebrew
     Utils.ensure_git_installed!
     tap = ARGV.value "tap"
-    repo_options = %w[--brew --core]
-    repos = ARGV & repo_options
-    odie "Specify one of #{repo_options.join " "}" if !tap && repos.empty?
-    merge_brew if ARGV.include? "--brew"
+    repos = ARGV
+    odie "Specify --core as an argument to merge homebrew-core" if !tap && repos.empty?
     merge_core if ARGV.include? "--core"
     merge_tap tap if tap
   end
