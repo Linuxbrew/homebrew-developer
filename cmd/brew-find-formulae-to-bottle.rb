@@ -11,12 +11,12 @@ module Homebrew
   end
 
   def head_has_conflict_lines?
-    `git log --format=%b -1`.chomp.include?("Conflicts:") ||
-      `git log --format=%b -1`.chomp.include?("Formula/")
+    @latest_merge_commit_message.include?("Conflicts:") ||
+      @latest_merge_commit_message.include?("Formula/")
   end
 
   def assemble_list_of_formulae_to_bottle
-    `git log --format=%b -1`.each_line do |line|
+    @latest_merge_commit_message.each_line do |line|
       line.strip!
       next if line.empty? || line == "Conflicts:"
 
@@ -27,6 +27,7 @@ module Homebrew
   odie "You need to be on the master branch to run this." unless on_master?
 
   @formulae_to_bottle = []
+  @latest_merge_commit_message = `git log --format=%b -1`.chomp
 
   if head_is_merge_commit?
     if head_has_conflict_lines?
