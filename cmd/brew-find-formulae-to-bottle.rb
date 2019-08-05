@@ -1,6 +1,10 @@
 module Homebrew
   module_function
 
+  def on_master?
+    `git rev-parse HEAD` == `git rev-parse master`
+  end
+
   def head_is_merge_commit?
     `git log --merges -1 --format=%H`.chomp == `git rev-parse HEAD`.chomp &&
       `git log --oneline --format=%s -1`.chomp == "Merge branch homebrew/master into linuxbrew/master"
@@ -19,6 +23,8 @@ module Homebrew
       @formulae_to_bottle.push(line.split('/')[1].split('.')[0])
     end
   end
+
+  odie "You need to be on the master branch to run this." unless on_master?
 
   @formulae_to_bottle = []
 
