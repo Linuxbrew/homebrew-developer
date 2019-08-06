@@ -6,8 +6,7 @@ module Homebrew
   end
 
   def head_is_merge_commit?
-    `git log --merges -1 --format=%H`.chomp == `git rev-parse HEAD`.chomp &&
-      `git log --oneline --format=%s -1`.chomp == "Merge branch homebrew/master into linuxbrew/master"
+    `git log --merges -1 --format=%H`.chomp == `git rev-parse HEAD`.chomp
   end
 
   def head_has_conflict_lines?
