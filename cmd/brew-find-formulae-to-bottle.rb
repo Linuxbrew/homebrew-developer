@@ -27,5 +27,5 @@ module Homebrew
     formulae_to_bottle.push(line.split('/')[1].split('.')[0])
   end
 
-  puts @formulae_to_bottle
+  puts formulae_to_bottle
 end
