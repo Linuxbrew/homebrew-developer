@@ -2,7 +2,7 @@ module Homebrew
   module_function
 
   def on_master?
-    `git rev-parse HEAD` == `git rev-parse master`
+    Utils.popen_read("git", "rev-parse", "--abbrev-ref", "HEAD").chomp == "master"
   end
 
   def head_is_merge_commit?
