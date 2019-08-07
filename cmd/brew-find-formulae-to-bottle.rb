@@ -24,7 +24,8 @@ module Homebrew
     line.strip!
     next if line.empty? || line == "Conflicts:"
 
-    formulae_to_bottle.push(line.split('/')[1].split('.')[0])
+    formula = line[%r{Formula/(.*).rb$}, 1]
+    formulae_to_bottle.push(formula) if formula
   end
 
   puts formulae_to_bottle
