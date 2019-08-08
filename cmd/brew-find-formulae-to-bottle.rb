@@ -22,7 +22,7 @@ module Homebrew
 
   latest_merge_commit_message.each_line do |line|
     line.strip!
-    next if line.empty? || line == "Conflicts:"
+    next unless line.include?("Formula/")
 
     formula = line[%r{Formula/(.*).rb$}, 1]
     formulae_to_bottle.push(formula) if formula
