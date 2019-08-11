@@ -99,7 +99,7 @@ module Homebrew
     if hub_version >= Version.new("2.3.0")
       args += ["-a", ENV["HOMEBREW_GITHUB_USER"] || ENV["USER"], "-l", "bottle"]
     else
-      opoo "Please upgrade hub\n  brew upgrade --devel hub"
+      opoo "Please upgrade hub\n  brew upgrade hub"
     end
     args << "--browse" if ARGV.include? "--browse"
     safe_system "hub", "pull-request", "-h", "#{remote}:#{branch}", "-m", message, *args
