@@ -56,26 +56,14 @@ By default, the following command will attempt to merge all the changes that the
 brew merge-homebrew --core
 ```
 
-This is usually undesireable since our build servers will time out. Instead attempt to only merge 8-10 modified formulae.
+Merging all the changes from upstream in one go is usually undesireable since our build servers will time out. Instead, attempt to only merge 8-10 modified formulae.
 
-To do this, find the most recently closed [merge pull request](https://github.com/Linuxbrew/homebrew-core/pulls?q=is%3Apr+is%3Aclosed), usually named "Merge YYYY-MM-DD `sha1`" or similar. Copy down that `sha1` and run:
+`git log --oneline master..homebrew/master` will show a list of all the upstream commits since the last merge, from oldest to newest.
 
-```bash
-git log --oneline <sha1>..HEAD
-```
-
-This will show all the upstream commits since the last merge, from newest to oldest.
-
-Now, pick a commit ID that will span 8-10 formulae. Confirm the list of changes with:
+Pick a commit sha that will merge between 8-10 formulae (16-20 commits including bottles). Once you're satisfied with the list of updated formulae, begin the merge:
 
 ```bash
-git log --oneline <sha1>..<new_sha1>
-```
-
-Once you're satisfied with the list of updated formulae, begin the merge:
-
-```bash
-brew merge-homebrew --core <new_sha1>
+brew merge-homebrew --core --skip-style <sha>
 ```
 
 ## Simple Conflicts
@@ -109,12 +97,7 @@ Of course, conflicts will be different every merge. You have to resolve these co
 
 For such conflicts, simply remove the "HEAD" (Linuxbrew's) part of the conflict along with `<<<<<<< HEAD`, `=======`, and `>>>>>>> homebrew/master` lines. Later, we will submit a request to rebuild bottles for Linuxbrew for such formulae.
 
-Remember to mark conflicts as resolved by executing
-
-```bash
-git add Formula/<formula-name>.rb
-```
-for each formula that encountered a conflict during the merge.
+The `merge-homebrew` script will stage resolved conflicts for you.
 
 ## Complex Conflicts
 
@@ -143,24 +126,7 @@ Note, that in the "HEAD" (Linuxbrew's) part we see previous code of the Homebrew
 
 ## Finishing the merge
 
-Once all the conflicts have been resolved, check that there are no obvious stylistic offenses that will prevent bottles from beeing built successfully:
-
-```bash
-brew style
-```
-
-Fix all the offenses, if any, and add changed files to the staging area by executing
-
-```bash
-git add Formula/<formula-name>.rb
-```
-
-Finish the merge by running:
-
-```bash
-git commit
-```
-This will open a text editor with pre-populated commit message title and body that will look like this:
+Once all the conflicts have been resolved, a text editor will open with pre-populated commit message title and body:
 
 ```text
 Merge branch homebrew/master into linuxbrew/master
@@ -170,6 +136,7 @@ Merge branch homebrew/master into linuxbrew/master
 #       Formula/gnutls.rb
 #       Formula/godep.rb
 ```
+
 Leave the title of the message unchanged and uncomment all the conflicting files. Your final commit message should be:
 
 ```text
@@ -183,36 +150,27 @@ Conflicts:
 
 ## Submitting a PR
 
-The merge is now recorded in our local branch `master`. Before these changes can make their way into Linuxbrew, we have to run basic checks on Travis and Circle CIs. This requires a GitHub pull request. To do that, we have to push our local branch `master` to a new branch in your GitHub fork:
-
-```bash
-git push your-fork master:merge-YYYY-MM-DD
-```
-where `YYYY`, `MM` and `DD` are current year, month, and date. Now we are ready to submit a PR. We can do so either from a web browser or *via* `hub pull-request`. To submit a PR using `hub` command, we have to first switch to the `merge-YYY-MM-DD` branch of `your-fork`:
-
-```bash
-git checkout merge-YYYY-MM-DD
-hub pull-request -m 'Merge YYYY-MM-DD'
-```
-If you decided to submit a PR from a web browser, make sure to use *`Merge YYYY-MM-DD`* title.
+The `merge-homebrew` command will create a pull-request for you, using `hub`.
 
 Please add one or two Linuxbrew developers to check the PR.
 
-Once the PR successfully passes the tests and/or is approved by other Linuxbrew developers, you can finalize the merge by pushing your local branch `master` to Linuxbrew:
+Once the PR successfully passes the tests and/or is approved by other Linuxbrew developers, you can finalize the merge with:
+
 ```bash
-git checkout master
+brew pull --clean <PR-NUMBER>
 git push origin master
 ```
 
-The merge is now complete. Don't forget to update your GitHub fork:
+The merge is now complete. Don't forget to update your GitHub fork by running `git push your-fork master`
+
+# Creating PRs to build bottles for conflicting formulae
+
+Now, create PRs to build bottles for formulae that encountered a conflict. A fast way to do this is to use `brew find-formulae-to-bottle` and a `for` loop in your shell:
+
 ```bash
-git push your-fork master
+for i in $(brew find-formulae-to-bottle); do
+  brew build-bottle-pr $i
+done
 ```
 
-Now, create PRs to build bottles for formulae that encountered a conflict. Here is a simple code snippet that does that by parsing the log message of the last commit:
-
-```bash
-brew build-bottle-pr --remote=your-fork $(git log -1 | grep "Formula/" | sed 's|^\s\+Formula/\(.*\).rb|\1|g')
-```
-
-## That's it!
+## Congratulations! All done!
