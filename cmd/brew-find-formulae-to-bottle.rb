@@ -27,8 +27,19 @@ module Homebrew
     formula.requirements.any? { |req| (req.instance_of? MacOSRequirement) && !req.version_specified? }
   end
 
+  def open_pull_request?(formula)
+    prs = GitHub.issues_for_formula(formula,
+      type: "pr", state: "open", repo: slug(formula.tap))
+    prs = prs.select { |pr| pr["title"].start_with? "#{formula}: " }
+    if prs.any?
+      opoo "#{formula}: Skipping because a PR is open"
+      prs.each { |pr| puts "#{pr["title"]} (#{pr["html_url"]})" }
+    end
+    prs.any?
+  end
+
   def should_not_build_linux_bottle?(formula, tag)
-    depends_on_macos?(formula) || formula.bottle_unneeded? || formula.bottle_disabled? || formula.bottle_specification.tag?(tag) || slug(formula.tap) == "Homebrew/homebrew-core"
+    depends_on_macos?(formula) || formula.bottle_unneeded? || formula.bottle_disabled? || formula.bottle_specification.tag?(tag) || slug(formula.tap) == "Homebrew/homebrew-core" || open_pull_request?(formula)
   end
 
   formulae_to_bottle = []

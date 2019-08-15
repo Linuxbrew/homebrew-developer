@@ -14,17 +14,6 @@ require "English"
 module Homebrew
   module_function
 
-  def open_pull_request?(formula)
-    prs = GitHub.issues_for_formula(formula,
-      type: "pr", state: "open", repo: slug(formula.tap))
-    prs = prs.select { |pr| pr["title"].start_with? "#{formula}: " }
-    if prs.any?
-      opoo "#{formula}: Skipping because a PR is open"
-      prs.each { |pr| puts "#{pr["title"]} (#{pr["html_url"]})" }
-    end
-    prs.any?
-  end
-
   def limit
     @limit ||= (ARGV.value("limit") || "10").to_i
   end
@@ -93,8 +82,6 @@ module Homebrew
     tap_dir = formula.tap.formula_dir
     remote = tap_dir.cd { determine_remote }
     odie "#{formula}: Failed to determine a remote to use for Pull Request" if remote.nil?
-
-    return if open_pull_request? formula
 
     @n += 1
     return ohai "#{formula}: Skipping because GitHub rate limits pull requests (limit = #{limit})." if @n > limit
