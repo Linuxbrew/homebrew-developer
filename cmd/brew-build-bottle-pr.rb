@@ -5,6 +5,7 @@
 #:    If `--limit` is passed, make at most the specified number of PR's at once. Defaults to 10.
 #:    If `--dry-run` is passed, do not actually make any PR's.
 #:    If `--verbose` is passed, print extra information.
+#:    If `--tap-dir` is passed, use the specified full path to a tap. Otherwise, use the Linuxbrew standard install location.
 #:    If `--force` is passed, delete local and remote 'bottle-<name>' branches if they exist. Use with care.
 #:    If `--browse` is passed, open a web browser for the new pull request.
 
@@ -19,6 +20,10 @@ module Homebrew
 
   def remote
     @remote ||= ARGV.value("remote") || "origin"
+  end
+
+  def tap_dir
+    @tap_dir ||= ARGV.value("tap-dir") || "/home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/homebrew/homebrew-core"
   end
 
   # Open a pull request using hub.
