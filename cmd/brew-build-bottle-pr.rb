@@ -1,8 +1,7 @@
 #:  * `build-bottle-pr` [`--remote=<user>`] [`--limit=<num>`] [`--dry-run`] [`--verbose`] [`--force`]:
 #:    Submit a pull request to build a bottle for a formula.
 #:
-#:    If `--remote` is passed, use the specified GitHub remote.
-#:      Otherwise, check $HOMEBREW_GITHUB_USER followed by $USER.
+#:    If `--remote` is passed, use the specified GitHub remote. Otherwise, use `origin`.
 #:    If `--limit` is passed, make at most the specified number of PR's at once. Defaults to 10.
 #:    If `--dry-run` is passed, do not actually make any PR's.
 #:    If `--verbose` is passed, print extra information.
@@ -18,46 +17,8 @@ module Homebrew
     @limit ||= (ARGV.value("limit") || "10").to_i
   end
 
-  def determine_remote
-    remotes = Utils.popen_read("git", "remote").split
-
-    # if --remote has been specified, it has to be correct
-    if !ARGV.value("remote").nil?
-      return ARGV.value("remote") if remotes.include?(ARGV.value("remote"))
-
-      onoe "No remote '#{ARGV.value("remote")}' was found in #{Dir.pwd}"
-    else
-      # Check HOMEBREW_GITHUB_USER and USER remotes
-      [ENV["HOMEBREW_GITHUB_USER"], ENV["USER"]].each { |n| return n if remotes.include? n }
-
-      # Nothing worked
-      onoe "Please provide a valid remote name to use for Pull Requests"
-      onoe "You can do so:"
-      onoe " * on the command line via --remote=NAME"
-      onoe " * by setting HOMEBREW_GITHUB_USER env. variable"
-      onoe " * or by having a remote named as your USER env. variable"
-    end
-
-    onoe "Available remotes:"
-    remotes.each do |f|
-      url = `git remote get-url #{f}`.chomp
-      onoe "* #{f.ljust(16)} #{url}"
-    end
-    exit 1
-  end
-
-  def check_remotes(formulae)
-    dirs = []
-    formulae.each { |f| dirs |= [f.tap.formula_dir] }
-    dirs.each do |dir|
-      cd dir do
-        ohai "Checking that specified remote exists in #{Dir.pwd}" if ARGV.verbose?
-        determine_remote
-        unless `git status --porcelain 2>/dev/null`.chomp.empty?
-          return opoo "You have uncommitted changes to #{Dir.pwd}"
-        end
-      end
-    end
+  def remote
+    @remote ||= ARGV.value("remote") || "origin"
   end
 
   # Open a pull request using hub.
@@ -79,10 +40,6 @@ module Homebrew
   @n = 0
 
   def build_bottle(formula)
-    tap_dir = formula.tap.formula_dir
-    remote = tap_dir.cd { determine_remote }
-    odie "#{formula}: Failed to determine a remote to use for Pull Request" if remote.nil?
-
     @n += 1
     return ohai "#{formula}: Skipping because GitHub rate limits pull requests (limit = #{limit})." if @n > limit
 
@@ -148,7 +105,6 @@ module Homebrew
       ohai "Adding following dependencies: #{deps.join ", "}" if ARGV.verbose? && !deps.empty?
       formulae = deps.map { |f| Formula[f] } + formulae
     end
-    check_remotes formulae
     formulae.each { |f| build_bottle f }
   end
 end
