@@ -1,4 +1,4 @@
-#:  * `build-bottle-pr` [`--remote=<user>`] [`--limit=<num>`] [`--dry-run`] [`--verbose`] [`--force`]:
+#:  * `build-bottle-pr` [`--remote=<user>`] [`--limit=<num>`] [`--dry-run`] [`--verbose`] [`--tap-dir`] [`--force`]:
 #:    Submit a pull request to build a bottle for a formula.
 #:
 #:    If `--remote` is passed, use the specified GitHub remote. Otherwise, use `origin`.
@@ -47,9 +47,6 @@ module Homebrew
   def build_bottle(formula)
     @n += 1
     return ohai "#{formula}: Skipping because GitHub rate limits pull requests (limit = #{limit})." if @n > limit
-
-    system HOMEBREW_BREW_FILE, "audit", formula.path
-    opoo "Please fix audit failure for #{formula}" unless $CHILD_STATUS.success?
 
     title = "#{formula}: Build a bottle for Linuxbrew"
     message = <<~EOS
