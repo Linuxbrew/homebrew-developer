@@ -87,28 +87,12 @@ module Homebrew
     end
   end
 
-  def shell(cmd)
-    output = `#{cmd}`
-    raise ErrorDuringExecution, cmd unless $CHILD_STATUS.success?
-
-    output
-  end
-
-  def brew(args)
-    shell "#{HOMEBREW_PREFIX}/bin/brew #{args}"
-  end
-
   def build_bottle_pr
     odie "Please install hub (brew install hub) before proceeding" unless which "hub"
     odie "No formula has been specified" if ARGV.formulae.empty?
 
     formulae = ARGV.formulae
-    unless ARGV.one?
-      deps = brew("deps -n --union #{formulae.join " "}").split
-      ohai "Adding following dependencies: #{deps.join ", "}" if ARGV.verbose? && !deps.empty?
-      formulae = deps.map { |f| Formula[f] } + formulae
-    end
-    formulae.each { |f| build_bottle f }
+    formulae.each { |f| build_bottle(f) }
   end
 end
 
