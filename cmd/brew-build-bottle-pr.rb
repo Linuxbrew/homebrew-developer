@@ -59,6 +59,7 @@ module Homebrew
 
     branch = "bottle-#{formula}"
     cd tap_dir do
+      formula_path = "Formula/#{formula}.rb"
       unless Utils.popen_read("git", "branch", "--list", branch).empty?
         return odie "#{formula}: Branch #{branch} already exists" unless ARGV.force?
 
@@ -66,13 +67,13 @@ module Homebrew
         safe_system "git", "branch", "-D", branch
       end
       safe_system "git", "checkout", "-b", branch, "master"
-      File.open(formula.path, "r+") do |f|
+      File.open(formula_path, "r+") do |f|
         s = f.read
         f.rewind
         f.write "# #{title}\n#{s}" if ARGV.value("dry_run").nil?
       end
       if ARGV.value("dry_run").nil?
-        safe_system "git", "commit", formula.path, "-m", title
+        safe_system "git", "commit", formula_path, "-m", title
         unless Utils.popen_read("git", "branch", "-r", "--list", "#{remote}/#{branch}").empty?
           return odie "#{formula}: Remote branch #{remote}/#{branch} already exists" unless ARGV.force?
 
