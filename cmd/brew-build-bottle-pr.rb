@@ -166,7 +166,7 @@ module Homebrew
   end
 
   def depends_on_macos?(formula)
-    formula.requirements.any? { |req| (req.instance_of? MacOSRequirement) && !req.minimum_version_specified? }
+    formula.requirements.any? { |req| (req.instance_of? MacOSRequirement) && !req.version_specified? }
   end
 
   def shell(cmd)
