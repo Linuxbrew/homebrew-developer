@@ -142,7 +142,6 @@ module Homebrew
         f.write "# #{title}\n#{s}" if ARGV.value("dry_run").nil?
       end
       if ARGV.value("dry_run").nil?
-        keep_old if ARGV.include? "--keep-old"
         safe_system "git", "commit", formula.path, "-m", title
         unless Utils.popen_read("git", "branch", "-r", "--list", "#{remote}/#{branch}").empty?
           return odie "#{formula}: Remote branch #{remote}/#{branch} already exists" unless ARGV.force?
