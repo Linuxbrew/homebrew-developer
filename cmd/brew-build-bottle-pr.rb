@@ -92,6 +92,8 @@ module Homebrew
   end
 
   def build_bottle_pr
+    ENV["HOMEBREW_DISABLE_LOAD_FORMULA"] = "1"
+
     odie "Please install hub (brew install hub) before proceeding" unless which "hub"
     odie "No formula has been specified" unless formula
 
