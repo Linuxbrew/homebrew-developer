@@ -14,6 +14,10 @@ require "English"
 module Homebrew
   module_function
 
+  def formula
+    @formula ||= ARGV.last.to_s
+  end
+
   def limit
     @limit ||= (ARGV.value("limit") || "10").to_i
   end
@@ -89,10 +93,9 @@ module Homebrew
 
   def build_bottle_pr
     odie "Please install hub (brew install hub) before proceeding" unless which "hub"
-    odie "No formula has been specified" if ARGV.formulae.empty?
+    odie "No formula has been specified" unless formula
 
-    formulae = ARGV.formulae
-    formulae.each { |f| build_bottle(f) }
+    build_bottle(formula)
   end
 end
 
