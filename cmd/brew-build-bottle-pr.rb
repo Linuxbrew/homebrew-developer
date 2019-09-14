@@ -1,8 +1,7 @@
-#:  * `build-bottle-pr` [`--remote=<user>`] [`--limit=<num>`] [`--dry-run`] [`--verbose`] [`--tap-dir`] [`--force`]:
+#:  * `build-bottle-pr` [`--remote=<user>`] [`--dry-run`] [`--verbose`] [`--tap-dir`] [`--force`]:
 #:    Submit a pull request to build a bottle for a formula.
 #:
 #:    If `--remote` is passed, use the specified GitHub remote. Otherwise, use `origin`.
-#:    If `--limit` is passed, make at most the specified number of PR's at once. Defaults to 10.
 #:    If `--dry-run` is passed, do not actually make any PR's.
 #:    If `--verbose` is passed, print extra information.
 #:    If `--tap-dir` is passed, use the specified full path to a tap. Otherwise, use the Linuxbrew standard install location.
@@ -16,10 +15,6 @@ module Homebrew
 
   def formula
     @formula ||= ARGV.last.to_s
-  end
-
-  def limit
-    @limit ||= (ARGV.value("limit") || "10").to_i
   end
 
   def remote
@@ -45,13 +40,7 @@ module Homebrew
     safe_system "hub", "pull-request", "-h", "#{remote}:#{branch}", "-m", message, *args
   end
 
-  # The number of bottled formula.
-  @n = 0
-
   def build_bottle(formula)
-    @n += 1
-    return ohai "#{formula}: Skipping because GitHub rate limits pull requests (limit = #{limit})." if @n > limit
-
     title = "#{formula}: Build a bottle for Linuxbrew"
     message = <<~EOS
       #{title}
