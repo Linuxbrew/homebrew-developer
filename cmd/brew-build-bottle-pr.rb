@@ -18,7 +18,7 @@ module Homebrew
   end
 
   def remote
-    @remote ||= ARGV.value("remote") || "origin"
+    @remote ||= ARGV.value("remote")
   end
 
   def tap_dir
@@ -85,6 +85,7 @@ module Homebrew
 
     odie "Please install hub (brew install hub) before proceeding" unless which "hub"
     odie "No formula has been specified" unless formula
+    odie "No remote has been specified: use `--remote=origin` or `--remote=$HOMEBREW_GITHUB_USER`" unless remote
 
     build_bottle(formula)
   end
