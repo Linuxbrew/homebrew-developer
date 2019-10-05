@@ -19,6 +19,7 @@ jobs:
         ln -s ../Homebrew/bin/brew /home/linuxbrew/.linuxbrew/bin/
         mkdir -p /home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/linuxbrew
         ln -s "$PWD" /home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/linuxbrew/homebrew-developer
+        /home/linuxbrew/.linuxbrew/bin/brew style linuxbrew/developer
         /home/linuxbrew/.linuxbrew/bin/brew install patchelf
         /home/linuxbrew/.linuxbrew/bin/brew test-bot --bintray-org=linuxbrew --git-name=LinuxbrewTestBot --git-email=testbot@linuxbrew.sh
       displayName: Run brew test-bot
