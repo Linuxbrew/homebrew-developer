@@ -13,6 +13,7 @@ module Homebrew
 
   def editor
     return @editor if @editor
+
     @editor = [which_editor]
     @editor += ["-f", "+/^<<<<"] if %w[gvim nvim vim vi].include? File.basename(editor[0])
     @editor
@@ -51,6 +52,7 @@ module Homebrew
   def resolve_conflicts
     conflicts = Utils.popen_read(git, "diff", "--name-only", "--diff-filter=U").split
     return conflicts if conflicts.empty?
+
     oh1 "Conflicts"
     puts conflicts.join(" ")
     if mergetool?

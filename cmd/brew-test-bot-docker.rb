@@ -27,7 +27,7 @@ module Homebrew
         brew test-bot --ci-upload --bintray-org=linuxbrew --git-name=LinuxbrewTestBot --git-email=testbot@linuxbrew.sh
         head *.json
         exit $status
-        EOS
+      EOS
 
     safe_system "docker", "cp", "linuxbrew-test-bot:/home/linuxbrew/linuxbrew-test-bot", "."
     cd "linuxbrew-test-bot" do

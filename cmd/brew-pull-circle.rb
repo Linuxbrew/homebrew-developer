@@ -9,7 +9,7 @@
 #:    `--git-name=<git-name>` Set the Git author/committer names to the given name.
 #:    `--git-email=<git-email>` Set the Git author/committer email to the given email.
 
-require 'fileutils'
+require "fileutils"
 
 module Homebrew
   module_function
@@ -56,8 +56,8 @@ module Homebrew
     odie json["message"] if json.is_a? Hash
     urls = json.map { |x| x["url"] }.uniq
 
-    FileUtils::mkdir_p "#{tap}/#{issue}"
-    FileUtils::cd "#{tap}/#{issue}" do
+    FileUtils.mkdir_p "#{tap}/#{issue}"
+    FileUtils.cd "#{tap}/#{issue}" do
       urls.each do |url|
         filename = File.basename(url).gsub("%25", "%").gsub("%2B", "+").gsub("%40", "@")
         puts filename

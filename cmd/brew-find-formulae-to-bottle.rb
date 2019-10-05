@@ -45,7 +45,9 @@ module Homebrew
   end
 
   def should_not_build_linux_bottle?(formula, tag)
-    depends_on_macos?(formula) || formula.bottle_unneeded? || formula.bottle_disabled? || formula.bottle_specification.tag?(tag) || slug(formula.tap) == "Homebrew/homebrew-core" || open_pull_request?(formula)
+    depends_on_macos?(formula) \
+      || formula.bottle_unneeded? || formula.bottle_disabled? || formula.bottle_specification.tag?(tag) \
+      || slug(formula.tap) == "Homebrew/homebrew-core" || open_pull_request?(formula)
   end
 
   def reason_to_not_build_bottle(formula, tag)
