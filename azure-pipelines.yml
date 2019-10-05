@@ -17,9 +17,10 @@ jobs:
         git clone https://github.com/Homebrew/brew /home/linuxbrew/.linuxbrew/Homebrew
         mkdir /home/linuxbrew/.linuxbrew/bin
         ln -s ../Homebrew/bin/brew /home/linuxbrew/.linuxbrew/bin/
-        mkdir -p /home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/linuxbrew
-        ln -s "$PWD" /home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/linuxbrew/homebrew-developer
-        /home/linuxbrew/.linuxbrew/bin/brew style linuxbrew/developer
+        tap=$(/home/linuxbrew/.linuxbrew/bin/brew --repo $BUILD_REPOSITORY_ID)
+        mkdir -p $(dirname "$tap")
+        ln -s "$PWD" "$tap"
+        /home/linuxbrew/.linuxbrew/bin/brew style $BUILD_REPOSITORY_ID
         /home/linuxbrew/.linuxbrew/bin/brew install patchelf
         /home/linuxbrew/.linuxbrew/bin/brew test-bot --bintray-org=linuxbrew --git-name=LinuxbrewTestBot --git-email=testbot@linuxbrew.sh
       displayName: Run brew test-bot
