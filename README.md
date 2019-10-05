@@ -1,17 +1,16 @@
-# Linuxbrew/developer
+# Homebrew/homebrew-linux-dev
 
-Tools for Linuxbrew developers
+Tools for Homebrew on Linux developers
 
-+ **build-bottle-pr**: Submit a pull request to build a bottle for Linuxbrew
++ **build-bottle-pr**: Submit a pull request to build a bottle for Linux
++ **find-formulae-to-bottle**: Get the list of conflicting formulae from a merge commit
 + **merge-homebrew**: Merge a tap Homebrew/repo into Linuxbrew/repo
-+ **pull-bottle**: Merge a pull request and update both the Mac and Linux bottles
-+ **pull-linux**: Merge a pull request and update the Linuxbrew bottle
 + **squash-bottle-pr**: Squash the last two commits created by build-bottle-pr
 
 ## Installation
 
 ```
-brew tap linuxbrew/developer
+brew tap homebrew/linux-dev
 ```
 
 ## Adding new tools
