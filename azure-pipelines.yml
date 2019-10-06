@@ -20,7 +20,7 @@ jobs:
         tap=$(/home/linuxbrew/.linuxbrew/bin/brew --repo $BUILD_REPOSITORY_ID)
         mkdir -p $(dirname "$tap")
         ln -s "$PWD" "$tap"
-        /home/linuxbrew/.linuxbrew/bin/brew style $BUILD_REPOSITORY_ID
+        #xxx /home/linuxbrew/.linuxbrew/bin/brew style $BUILD_REPOSITORY_ID
         /home/linuxbrew/.linuxbrew/bin/brew install patchelf
         /home/linuxbrew/.linuxbrew/bin/brew test-bot --bintray-org=linuxbrew --git-name=LinuxbrewTestBot --git-email=testbot@linuxbrew.sh
       displayName: Run brew test-bot
