@@ -1,6 +1,6 @@
-# Linuxbrew/developer
+# Homebrew/linux-dev
 
-Tools for Linuxbrew developers
+Tools for Homebrew on Linux developers
 
 + **build-bottle-pr**: Submit a pull request to build a bottle for Linuxbrew
 + **merge-homebrew**: Merge a tap Homebrew/repo into Linuxbrew/repo
@@ -11,9 +11,9 @@ Tools for Linuxbrew developers
 ## Installation
 
 ```
-brew tap linuxbrew/developer
+brew tap homebrew/linux-dev
 ```
 
 ## Adding new tools
 
-Read the ["External Commands" Linuxbrew document](https://github.com/Linuxbrew/brew/blob/master/docs/External-Commands.md) to see how to create Homebrew external commands.
+Read the ["External Commands" Linuxbrew document](https://github.com/Homebrew/brew/blob/master/docs/External-Commands.md) to see how to create Homebrew external commands.
