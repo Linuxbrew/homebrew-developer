@@ -1,6 +1,8 @@
 #:  * `announce` <formulae>:
 #:    Create an announcement for new formulae.
 
+  xxx
+
 module Homebrew
   module_function
 
