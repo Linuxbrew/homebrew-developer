@@ -14,7 +14,7 @@ module Homebrew
     argv = ARGV.join(" ")
     safe_system "docker", "run", "--name=linuxbrew-test-bot",
       "-e", "HOMEBREW_BINTRAY_USER", "-e", "HOMEBREW_BINTRAY_KEY",
-      "linuxbrew/brew",
+      "homebrew/brew",
       "sh", "-c", <<~EOS
         git config --global user.name LinuxbrewTestBot
         git config --global user.email testbot@linuxbrew.sh
