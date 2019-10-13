@@ -25,6 +25,14 @@ module Homebrew
     @tap_dir ||= ARGV.value("tap-dir") || "/home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/homebrew/homebrew-core"
   end
 
+  # Check if pull request is already opened.
+  def hub_pr_already_opened?(title)
+    `hub pr list --format '%t%n'`.each_line do |line|
+      return true if line.chomp == title
+    end
+    false
+  end
+
   # Open a pull request using hub.
   def hub_pull_request(formula, remote, branch, message)
     ohai "#{formula}: Using remote '#{remote}' to submit Pull Request" if ARGV.verbose?
@@ -53,6 +61,8 @@ module Homebrew
     branch = "bottle-#{formula}"
     cd tap_dir do
       formula_path = "Formula/#{formula}.rb"
+      return odie "#{formula}: PR already exists" if hub_pr_already_opened?(title)
+
       unless Utils.popen_read("git", "branch", "--list", branch).empty?
         return odie "#{formula}: Branch #{branch} already exists" unless ARGV.force?
 
