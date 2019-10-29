@@ -9,7 +9,7 @@ module Homebrew
   #    brew pull --bottle 123
   #    brew squash-bottle-pr
   def squash_bottle_pr
-    unless Utils.popen_read("git", "log", "-n1", "--pretty=%s", "HEAD~1").match?(/: Build a bottle for Linuxbrew$/)
+    unless Utils.popen_read("git", "log", "-n1", "--pretty=%s", "HEAD~1").match?(/: Build a bottle for Linux$/)
       opoo "No build-bottle-pr commit was found"
       return
     end
