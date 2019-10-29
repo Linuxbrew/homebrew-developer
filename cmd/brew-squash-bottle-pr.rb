@@ -9,7 +9,7 @@ module Homebrew
   #    brew pull --bottle 123
   #    brew squash-bottle-pr
   def squash_bottle_pr
-    unless Utils.popen_read("git", "log", "-n1", "--pretty=%s", "HEAD~1") =~ /: Build a bottle for Linuxbrew$/
+    unless Utils.popen_read("git", "log", "-n1", "--pretty=%s", "HEAD~1").match?(/: Build a bottle for Linuxbrew$/)
       opoo "No build-bottle-pr commit was found"
       return
     end
@@ -32,7 +32,7 @@ module Homebrew
 
     safe_system "git", "show" if ARGV.verbose?
 
-    if Utils.popen_read("git", "log", "-n1", "--pretty=%s", "HEAD~1") =~ /^drop! /
+    if Utils.popen_read("git", "log", "-n1", "--pretty=%s", "HEAD~1").match?(/^drop! /)
       bottle_head = Utils.popen_read("git", "rev-parse", "HEAD").chomp
       safe_system "git", "reset", "--hard", "HEAD~2"
       safe_system "git", "cherry-pick", bottle_head
