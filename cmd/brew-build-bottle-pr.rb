@@ -4,7 +4,7 @@
 #:    If `--remote` is passed, use the specified GitHub remote. Otherwise, use `origin`.
 #:    If `--dry-run` is passed, do not actually make any PR's.
 #:    If `--verbose` is passed, print extra information.
-#:    If `--tap-dir` is passed, use the specified full path to a tap. Otherwise, use the Linuxbrew standard install location.
+#:    If `--tap-dir` is passed, use the specified full path to a tap. Otherwise, use the Homebrew on Linux standard install location.
 #:    If `--force` is passed, delete local and remote 'bottle-<name>' branches if they exist. Use with care.
 #:    If `--browse` is passed, open a web browser for the new pull request.
 
@@ -41,7 +41,7 @@ module Homebrew
   end
 
   def build_bottle(formula)
-    title = "#{formula}: Build a bottle for Linuxbrew"
+    title = "#{formula}: Build a bottle for Linux"
     message = <<~EOS
       #{title}
 
