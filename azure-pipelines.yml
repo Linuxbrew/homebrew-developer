@@ -14,7 +14,7 @@ jobs:
         sudo cp -a $(Build.Repository.LocalPath) /home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/homebrew/homebrew-linux-dev
       displayName: Set up tap
     - bash: |
-        /home/linuxbrew/.linuxbrew/bin/brew style $BUILD_REPOSITORY_ID
+        sudo -E /home/linuxbrew/.linuxbrew/bin/brew style $BUILD_REPOSITORY_ID
       displayName: Run brew style
       env:
         HOMEBREW_NO_AUTO_UPDATE: 1
