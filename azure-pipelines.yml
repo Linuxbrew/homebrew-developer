@@ -1,5 +1,5 @@
 jobs:
-- job: Check style of commands
+- job: CheckStyle
   pool:
     vmImage: ubuntu-16.04
   container:
