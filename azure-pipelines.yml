@@ -6,6 +6,10 @@ jobs:
     image: homebrew/brew:latest
   steps:
     - bash: |
+        git config --global user.name LinuxbrewTestBot
+        git config --global user.email testbot@linuxbrew.sh
+      displayName: Configure git
+    - bash: |
         git fetch origin "master:master" "pull/$SYSTEM_PULLREQUEST_PULLREQUESTNUMBER/head:pr"
         git checkout pr
       condition: ne(variables['System.PullRequest.PullRequestNumber'], '')
@@ -13,6 +17,11 @@ jobs:
     - bash: |
         sudo cp -a $(Build.Repository.LocalPath) /home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/homebrew/homebrew-linux-dev
       displayName: Set up tap
+    - bash: |
+        cd /home/linuxbrew/.linuxbrew/Homebrew
+        sudo git fetch origin --tags
+        sudo git reset --hard origin/master
+      displayName: Update Homebrew
     - bash: |
         sudo -E /home/linuxbrew/.linuxbrew/bin/brew style $BUILD_REPOSITORY_ID
       displayName: Run brew style
