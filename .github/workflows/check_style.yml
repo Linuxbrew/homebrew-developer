@@ -1,0 +1,21 @@
+name: Check style
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: homebrew/brew
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+      - name: Update
+        run: brew update-reset $(brew --repository)
+      - name: Test
+        run: brew style $GITHUB_REPOSITORY
