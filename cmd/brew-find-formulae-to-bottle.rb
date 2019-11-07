@@ -29,23 +29,11 @@ module Homebrew
     (tap.official? && !x.nil?) ? x.capitalize : x
   end
 
-  def open_pull_request?(formula)
-    prs = GitHub.issues_for_formula(formula,
-      type: "pr", state: "open", repo: slug(formula.tap))
-    prs = prs.select { |pr| pr["title"].start_with? "#{formula}: " }
-    if prs.any? && ARGV.verbose?
-      opoo "#{formula}: Skipping because a PR is open"
-      prs.each { |pr| ohai "#{pr["title"]} (#{pr["html_url"]})" }
-    end
-    prs.any?
-  end
-
   def should_not_build_linux_bottle?(formula, tag)
     formula.bottle_unneeded? || \
       formula.bottle_disabled? || \
       formula.bottle_specification.tag?(tag) || \
-      slug(formula.tap) == "Homebrew/homebrew-core" || \
-      open_pull_request?(formula)
+      slug(formula.tap) == "Homebrew/homebrew-core"
   end
 
   def reason_to_not_build_bottle(formula, tag)
@@ -53,7 +41,6 @@ module Homebrew
     return opoo "#{formula}: Skipping because bottles are disabled" if formula.bottle_disabled?
     return opoo "#{formula}: Skipping because it has a bottle already" if formula.bottle_specification.tag?(tag)
     return opoo "#{formula}: Skipping because #{formula.tap} does not support Linux" if slug(formula.tap) == "Homebrew/homebrew-core"
-    return if open_pull_request?(formula)
   end
 
   formulae_to_bottle = []
