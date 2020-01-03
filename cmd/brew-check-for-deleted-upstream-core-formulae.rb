@@ -1,5 +1,4 @@
 #:  * `check-for-deleted-upstream-core-formulae` [`--homebrew-repo-dir`] [`--linuxbrew-repo-dir`]:
-#:    Find
 #:    Outputs a list of formulae (with `.rb` suffix) for further `git rm` usage.
 #:
 #:    If `--linuxbrew-repo-dir` is passed, use the specified full path to the Homebrew/linuxbrew-core tap. Otherwise, use the Homebrew on Linux standard install location.
