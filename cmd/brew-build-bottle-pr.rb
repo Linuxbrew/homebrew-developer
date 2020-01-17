@@ -64,7 +64,7 @@ module Homebrew
       return odie "#{formula}: PR already exists" if hub_pr_already_opened?(title)
 
       unless Utils.popen_read("git", "branch", "--list", branch).empty?
-        return odie "#{formula}: Branch #{branch} already exists" unless ARGV.force?
+        return odie "#{formula}: Branch #{branch} already exists" unless ARGV.include? "--force"
 
         ohai "#{formula}: Removing branch #{branch} in #{tap_dir}" if ARGV.verbose?
         safe_system "git", "branch", "-D", branch
@@ -78,7 +78,7 @@ module Homebrew
       if ARGV.value("dry_run").nil?
         safe_system "git", "commit", formula_path, "-m", title
         unless Utils.popen_read("git", "branch", "-r", "--list", "#{remote}/#{branch}").empty?
-          return odie "#{formula}: Remote branch #{remote}/#{branch} already exists" unless ARGV.force?
+          return odie "#{formula}: Remote branch #{remote}/#{branch} already exists" unless ARGV.include? "--force"
 
           ohai "#{formula}: Removing branch #{branch} from #{remote}" if ARGV.verbose?
           safe_system "git", "push", "--delete", remote, branch
