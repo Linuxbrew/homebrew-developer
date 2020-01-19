@@ -1,11 +1,20 @@
-#:  * `find-formulae-to-bottle` [`--verbose`]:
-#:    Find conflicting formulae from the latest merge commit.
-#:    Outputs a list that can be passed to `brew build-bottle-pr`.
-#:
-#:    If `--verbose` is passed, print debugging information (eg if a formula already has a bottle PR open).
+require "cli/parser"
 
 module Homebrew
   module_function
+
+  def find_formulae_to_bottle_args
+    Homebrew::CLI::Parser.new do
+      usage_banner <<~EOS
+        `find-formulae-to-bottle` [`--verbose`]:
+        Find conflicting formulae from the latest merge commit.
+        Outputs a list that can be passed to `brew build-bottle-pr`.
+      EOS
+      switch "--verbose",
+             description: "Print debugging information, e.g. if a formula already has a bottle PR open."
+      max_named 1
+    end
+  end
 
   def on_master?
     Utils.popen_read("git", "rev-parse", "--abbrev-ref", "HEAD").chomp == "master"
@@ -44,6 +53,8 @@ module Homebrew
   end
 
   def find_formulae_to_bottle
+    find_formulae_to_bottle_args.parse
+
     formulae_to_bottle = []
     latest_merge_commit_message = Utils.popen_read("git", "log", "--format=%b", "-1").chomp
 
@@ -58,12 +69,12 @@ module Homebrew
       formulae_to_bottle.push(@formula) if @formula
     end
 
-    tag = (ARGV.value("tag") || "x86_64_linux").to_sym
+    tag = "x86_64_linux".to_sym
     formulae_to_bottle.reject! do |formula|
       should_not_build_linux_bottle?(Formula[formula], tag)
     end
 
-    reason_to_not_build_bottle(Formula[@formula], tag) if ARGV.verbose?
+    reason_to_not_build_bottle(Formula[@formula], tag) if Homebrew.args.verbose?
 
     puts formulae_to_bottle
   end
