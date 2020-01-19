@@ -1,28 +1,39 @@
-#:  * `build-bottle-pr` [`--remote=<user>`] [`--dry-run`] [`--verbose`] [`--tap-dir`] [`--force`]:
-#:    Submit a pull request to build a bottle for a formula.
-#:
-#:    If `--remote` is passed, use the specified GitHub remote. Otherwise, use `origin`.
-#:    If `--dry-run` is passed, do not actually make any PR's.
-#:    If `--verbose` is passed, print extra information.
-#:    If `--tap-dir` is passed, use the specified full path to a tap. Otherwise, use the Homebrew on Linux standard install location.
-#:    If `--force` is passed, delete local and remote 'bottle-<name>' branches if they exist. Use with care.
-#:    If `--browse` is passed, open a web browser for the new pull request.
-
+require "cli/parser"
 require "English"
 
 module Homebrew
   module_function
+
+  def build_bottle_pr_args
+    Homebrew::CLI::Parser.new do
+      usage_banner <<~EOS
+        `build-bottle-pr` [`--remote=<user>`] [`--dry-run`] [`--verbose`] [`--tap-dir`] [`--force`]
+        Submit a pull request to build a bottle for a formula.
+      EOS
+      flag "--remote",
+           description: "Use the specified GitHub remote. Otherwise, use `origin`."
+      flag "--tap-dir",
+           description: "Use the specified full path to a tap. Otherwise, use the Homebrew on Linux standard install location."
+      switch "--browse",
+             description: "Open a web browser for the pull request."
+      switch "--dry-run",
+             description: "Do not actually raise any pull requests."
+      switch "--force",
+             description: "Delete local and remote 'bottle-<formula>' branches if they exist. Use with care."
+      switch :verbose
+    end
+  end
 
   def formula
     @formula ||= ARGV.last.to_s
   end
 
   def remote
-    @remote ||= ARGV.value("remote") || ENV["HOMEBREW_GITHUB_USER"] || "origin"
+    @remote ||= Homebrew.args.remote || ENV["HOMEBREW_GITHUB_USER"] || origin
   end
 
   def tap_dir
-    @tap_dir ||= ARGV.value("tap-dir") || "/home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/homebrew/homebrew-core"
+    @tap_dir ||= Homebrew.args.tap_dir || "/home/linuxbrew/.linuxbrew/Homebrew/Library/Taps/homebrew/homebrew-core"
   end
 
   # Check if pull request is already opened.
@@ -35,7 +46,7 @@ module Homebrew
 
   # Open a pull request using hub.
   def hub_pull_request(formula, remote, branch, message)
-    ohai "#{formula}: Using remote '#{remote}' to submit Pull Request" if ARGV.verbose?
+    ohai "#{formula}: Using remote '#{remote}' to submit Pull Request" if Homebrew.args.verbose?
     safe_system "git", "push", remote, branch
     args = []
     hub_version = Version.new(Utils.popen_read("hub", "--version")[/hub version ([0-9.]+)/, 1])
@@ -44,7 +55,7 @@ module Homebrew
     else
       opoo "Please upgrade hub\n  brew upgrade hub"
     end
-    args << "--browse" if ARGV.include? "--browse"
+    args << "--browse" if Homebrew.args.browse?
     safe_system "hub", "pull-request", "-h", "#{remote}:#{branch}", "-m", message, *args
   end
 
@@ -64,23 +75,23 @@ module Homebrew
       return odie "#{formula}: PR already exists" if hub_pr_already_opened?(title)
 
       unless Utils.popen_read("git", "branch", "--list", branch).empty?
-        return odie "#{formula}: Branch #{branch} already exists" unless ARGV.include? "--force"
+        return odie "#{formula}: Branch #{branch} already exists" unless Homebrew.args.force?
 
-        ohai "#{formula}: Removing branch #{branch} in #{tap_dir}" if ARGV.verbose?
+        ohai "#{formula}: Removing branch #{branch} in #{tap_dir}" if Homebrew.args.verbose?
         safe_system "git", "branch", "-D", branch
       end
       safe_system "git", "checkout", "-b", branch, "master"
       File.open(formula_path, "r+") do |f|
         s = f.read
         f.rewind
-        f.write "# #{title}\n#{s}" if ARGV.value("dry_run").nil?
+        f.write "# #{title}\n#{s}" unless Homebrew.args.dry_run?
       end
-      if ARGV.value("dry_run").nil?
+      unless Homebrew.args.dry_run?
         safe_system "git", "commit", formula_path, "-m", title
         unless Utils.popen_read("git", "branch", "-r", "--list", "#{remote}/#{branch}").empty?
-          return odie "#{formula}: Remote branch #{remote}/#{branch} already exists" unless ARGV.include? "--force"
+          return odie "#{formula}: Remote branch #{remote}/#{branch} already exists" unless Homebrew.args.force?
 
-          ohai "#{formula}: Removing branch #{branch} from #{remote}" if ARGV.verbose?
+          ohai "#{formula}: Removing branch #{branch} from #{remote}" if Homebrew.args.verbose?
           safe_system "git", "push", "--delete", remote, branch
         end
         hub_pull_request formula, remote, branch, message
@@ -91,6 +102,8 @@ module Homebrew
   end
 
   def build_bottle_pr
+    build_bottle_pr_args.parse
+
     ENV["HOMEBREW_DISABLE_LOAD_FORMULA"] = "1"
 
     odie "Please install hub (brew install hub) before proceeding" unless which "hub"
