@@ -1,14 +1,28 @@
+require "cli/parser"
 require "formula"
 
 module Homebrew
   module_function
 
-  # Squash the last two commits of build-bottle-pr.
-  # Usage:
-  #    brew build-bottle-pr foo
-  #    brew pull --bottle 123
-  #    brew squash-bottle-pr
+  def squash_bottle_pr_args
+    Homebrew::CLI::Parser.new do
+      usage_banner <<~EOS
+        `squash-bottle-pr` [`--verbose`]
+        Squashes the two commits ("build a bottle for Linux" comment + BrewTestBot bottles) into one for bottle PRs.
+        ```
+        brew build-bottle-pr <formula>
+        brew pull --bottle <pr-number>
+        brew squash-bottle-pr
+        ```
+      EOS
+      switch :verbose
+      max_named 1
+    end
+  end
+
   def squash_bottle_pr
+    squash_bottle_pr_args.parse
+
     marker = "Build a bottle for Linux"
 
     unless Utils.popen_read("git", "log", "-n1", "--pretty=%s", "HEAD~1").match?(/: #{marker}$/)
@@ -31,7 +45,7 @@ module Homebrew
     safe_system "git", "-c", "commit.verbose=false", "commit", "--author", author, file
     ENV["GIT_EDITOR"] = git_editor
 
-    safe_system "git", "show" if ARGV.verbose?
+    safe_system "git", "show" if Homebrew.args.verbose?
 
     if Utils.popen_read("git", "log", "-n1", "--pretty=%s", "HEAD~1").match?(/^drop! /)
       bottle_head = Utils.popen_read("git", "rev-parse", "HEAD").chomp
