@@ -38,11 +38,15 @@ module Homebrew
     formulae
   end
 
-  formulae_only_in_linuxbrew = linuxbrew_core_formulae - homebrew_core_formulae
-  if formulae_only_in_linuxbrew.empty?
-    ohai "No formulae need deleting."
-  else
-    ohai "These formulae need deleting from Homebrew/linuxbrew-core:"
-    puts formulae_only_in_linuxbrew
+  def check_for_deleted_upstream_core_formulae
+    formulae_only_in_linuxbrew = linuxbrew_core_formulae - homebrew_core_formulae
+    if formulae_only_in_linuxbrew.empty?
+      ohai "No formulae need deleting."
+    else
+      ohai "These formulae need deleting from Homebrew/linuxbrew-core:"
+      puts formulae_only_in_linuxbrew
+    end
   end
 end
+
+Homebrew.check_for_deleted_upstream_core_formulae
