@@ -56,7 +56,7 @@ module Homebrew
       This is an automated pull request to build a new bottle for linuxbrew-core
       based on the existing bottle block from homebrew-core.
     EOS
-    oh1 "#{@n}. #{title}"
+    oh1 title
 
     branch = "bottle-#{formula}"
     cd tap_dir do
