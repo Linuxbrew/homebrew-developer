@@ -19,6 +19,8 @@ jobs:
       - name: Update
         run: brew update-reset "$(brew --repository)"
       - name: Setup
-        run: cp -a "$PWD" "$(brew --repository ${{github.repository}})"
+        run: |
+          mkdir -p "$(dirname $(brew --repository ${{github.repository}}))"
+          cp -a "$PWD" "$(brew --repository ${{github.repository}})"
       - name: Test
         run: brew style "${{github.repository}}"
