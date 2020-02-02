@@ -45,7 +45,7 @@ module Homebrew
       opoo "Please upgrade hub\n  brew upgrade hub"
     end
     args << "--browse" if ARGV.include? "--browse"
-    safe_system "hub", "pull-request", "-h", "#{remote}:#{branch}", "-m", message, *args
+    safe_system "hub", "pull-request", "-b", "develop", "-h", "#{remote}:#{branch}", "-m", message, *args
   end
 
   def build_bottle(formula)
