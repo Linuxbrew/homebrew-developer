@@ -1,23 +1,12 @@
-require "cli/parser"
+#:  * `check-for-deleted-upstream-core-formulae` [`--homebrew-repo-dir`] [`--linuxbrew-repo-dir`]:
+#:    Outputs a list of formulae (with `.rb` suffix) for further `git rm` usage.
+#:
+#:    If no arguments are passed, use master branch of core tap as Homebrew/linuxbrew-core repo and homebrew/master branch as Homebrew/homebrew-core repo.
+#:    If `--linuxbrew-repo-dir` is passed, use the specified full path to the Homebrew/linuxbrew-core repo. Otherwise, use the Homebrew on Linux standard install location.
+#:    When `--homebrew-repo-dir` is passed, use the specified full path to the Homebrew/homebrew-core repo. Otherwise, use the Homebrew on Linux standard install location.
 
 module Homebrew
   module_function
-
-  def check_for_deleted_upstream_core_formulae_args
-    Homebrew::CLI::Parser.new do
-      usage_banner <<~EOS
-        `check-for-deleted-upstream-core-formulae` [`--homebrew-repo-dir`] [`--linuxbrew-repo-dir`]
-        Outputs a list of formulae (with `.rb` suffix) for further `git rm` usage.
-        If no arguments are passed, use the `master` branch of the core tap as Homebrew/linuxbrew-core,
-        and the `homebrew/master` branch as Homebrew/homebrew-core.
-      EOS
-      flag "--linuxbrew-repo-dir",
-             description: "Full path to the Homebrew/linuxbrew-core repo on disk."
-      flag "--homebrew-repo-dir",
-            description: "Full path to the Homebrew/homebrew-core repo on disk."
-      max_named 1
-    end
-  end
 
   def git?
     homebrew_repo_dir == linuxbrew_repo_dir
@@ -28,11 +17,11 @@ module Homebrew
   end
 
   def homebrew_repo_dir
-    @homebrew_repo_dir ||= Homebrew.args.homebrew_repo_dir || CoreTap.instance.path
+    @homebrew_repo_dir ||= ARGV.value("homebrew-repo-dir") || CoreTap.instance.path
   end
 
   def linuxbrew_repo_dir
-    @linuxbrew_repo_dir ||= Homebrew.args.linuxbrew_repo_dir || CoreTap.instance.path
+    @linuxbrew_repo_dir ||= ARGV.value("linuxbrew-repo-dir") || CoreTap.instance.path
   end
 
   def homebrew_core_formulae
@@ -49,17 +38,11 @@ module Homebrew
     formulae
   end
 
-  def check_for_deleted_upstream_core_formulae
-    check_for_deleted_upstream_core_formulae_args.parse
-
-    formulae_only_in_linuxbrew = linuxbrew_core_formulae - homebrew_core_formulae
-    if formulae_only_in_linuxbrew.empty?
-      ohai "No formulae need deleting."
-    else
-      ohai "These formulae need deleting from Homebrew/linuxbrew-core:"
-      puts formulae_only_in_linuxbrew
-    end
+  formulae_only_in_linuxbrew = linuxbrew_core_formulae - homebrew_core_formulae
+  if formulae_only_in_linuxbrew.empty?
+    ohai "No formulae need deleting."
+  else
+    ohai "These formulae need deleting from Homebrew/linuxbrew-core:"
+    puts formulae_only_in_linuxbrew
   end
 end
-
-Homebrew.check_for_deleted_upstream_core_formulae

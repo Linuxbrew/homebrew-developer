@@ -1,28 +1,15 @@
-require "cli/parser"
+#:  * `merge-homebrew` [`--core`|`--tap=user/repo`] [<commit>]:
+#:   Merge branch homebrew/master into origin/master.
+#:
+#:   If `--core` is passed, merge Homebrew/homebrew-core into Homebrew/linuxbrew-core.
+#:   If `--tap=user/repo` is passed, merge Homebrew/tap into user/tap.
+#:   If `--skip-style` is passed, skip running brew style.
+#:   If <commit> is passed, merge only up to that upstream SHA-1 commit.
+
 require "date"
 
 module Homebrew
   module_function
-
-  def merge_homebrew_args
-    Homebrew::CLI::Parser.new do
-      usage_banner <<~EOS
-        `merge-homebrew` [`--core` | `--tap=user/repo`] [<commit>]:
-        Merge branch homebrew/master into origin/master.
-        If <commit> is passed, merge only up to that upstream SHA-1 commit.
-      EOS
-      flag "--tap=",
-           description: "Merge Homebrew/tap into user/tap."
-      switch "--core",
-           description: "Merge Homebrew/homebrew-core into Homebrew/linuxbrew-core."
-      switch "--browse",
-           description: "Open a web browser for the pull request."
-      switch "--skip-style",
-           description: "Skip running `brew style` on merged formulae."
-      max_named 1
-      conflicts "--core", "--tap"
-    end
-  end
 
   def editor
     return @editor if @editor
@@ -73,7 +60,7 @@ module Homebrew
     else
       safe_system *editor, *conflicts
     end
-    safe_system HOMEBREW_BREW_FILE, "style", *conflicts unless Homebrew.args.skip_style?
+    safe_system HOMEBREW_BREW_FILE, "style", *conflicts unless ARGV.include? "--skip-style"
     safe_system git, "diff", "--check"
     safe_system git, "add", "--", *conflicts
     conflicts
@@ -93,7 +80,7 @@ module Homebrew
     safe_system git, "push", remote, "HEAD:#{branch}"
     safe_system "hub", "pull-request", "-f", "-h", "#{remote}:#{branch}", "-m", message,
       "-a", remote, "-l", "merge",
-      *("--browse" if Homebrew.args.browse?)
+      *("--browse" if ARGV.include? "--browse")
   end
 
   def merge_core
@@ -111,26 +98,21 @@ module Homebrew
   end
 
   def homebrew_commits
-    if Homebrew.args.named.empty?
+    if ARGV.named.empty?
       ["homebrew/master"]
     else
-      Homebrew.args.named.each { |sha1| safe_system git, "rev-parse", "--verify", sha1 }
-      Homebrew.args.named
+      ARGV.named.each { |sha1| safe_system git, "rev-parse", "--verify", sha1 }
+      ARGV.named
     end
   end
 
   def merge_homebrew
-    merge_homebrew_args.parse
-
     Utils.ensure_git_installed!
-
-    if !Homebrew.args.core? && !Homebrew.args.tap
-      odie "Specify --core as an argument to merge homebrew-core or --tap to merge to user/tap"
-    elsif Homebrew.args.core?
-      merge_core
-    elsif Homebrew.args.tap
-      merge_tap Homebrew.args.tap
-    end
+    tap = ARGV.value "tap"
+    repos = ARGV
+    odie "Specify --core as an argument to merge homebrew-core" if !tap && repos.empty?
+    merge_core if ARGV.include? "--core"
+    merge_tap tap if tap
   end
 end
 

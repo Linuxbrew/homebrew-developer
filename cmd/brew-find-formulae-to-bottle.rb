@@ -1,20 +1,11 @@
-require "cli/parser"
+#:  * `find-formulae-to-bottle` [`--verbose`]:
+#:    Find conflicting formulae from the latest merge commit.
+#:    Outputs a list that can be passed to `brew build-bottle-pr`.
+#:
+#:    If `--verbose` is passed, print debugging information (eg if a formula already has a bottle PR open).
 
 module Homebrew
   module_function
-
-  def find_formulae_to_bottle_args
-    Homebrew::CLI::Parser.new do
-      usage_banner <<~EOS
-        `find-formulae-to-bottle` [`--verbose`]:
-        Find conflicting formulae from the latest merge commit.
-        Outputs a list that can be passed to `brew build-bottle-pr`.
-      EOS
-      switch "--verbose",
-             description: "Print debugging information, e.g. if a formula already has a bottle PR open."
-      max_named 1
-    end
-  end
 
   def on_master?
     Utils.popen_read("git", "rev-parse", "--abbrev-ref", "HEAD").chomp == "master"
@@ -52,32 +43,26 @@ module Homebrew
     return opoo "#{formula}: Skipping because #{formula.tap} does not support Linux" if slug(formula.tap) == "Homebrew/homebrew-core"
   end
 
-  def find_formulae_to_bottle
-    find_formulae_to_bottle_args.parse
+  formulae_to_bottle = []
+  latest_merge_commit_message = Utils.popen_read("git", "log", "--format=%b", "-1").chomp
 
-    formulae_to_bottle = []
-    latest_merge_commit_message = Utils.popen_read("git", "log", "--format=%b", "-1").chomp
+  odie "You need to be on the master branch to run this." unless on_master?
+  odie "HEAD is not a merge commit." unless head_is_merge_commit?
+  odie "HEAD does not have any bottles to build for new versions." unless head_has_conflict_lines?(latest_merge_commit_message)
 
-    odie "You need to be on the master branch to run this." unless on_master?
-    odie "HEAD is not a merge commit." unless head_is_merge_commit?
-    odie "HEAD does not have any bottles to build for new versions." unless head_has_conflict_lines?(latest_merge_commit_message)
+  latest_merge_commit_message.each_line do |line|
+    line.strip!
 
-    latest_merge_commit_message.each_line do |line|
-      line.strip!
-
-      @formula = line[%r{Formula/(.*).rb$}, 1]
-      formulae_to_bottle.push(@formula) if @formula
-    end
-
-    tag = "x86_64_linux".to_sym
-    formulae_to_bottle.reject! do |formula|
-      should_not_build_linux_bottle?(Formula[formula], tag)
-    end
-
-    reason_to_not_build_bottle(Formula[@formula], tag) if Homebrew.args.verbose?
-
-    puts formulae_to_bottle
+    @formula = line[%r{Formula/(.*).rb$}, 1]
+    formulae_to_bottle.push(@formula) if @formula
   end
-end
 
-Homebrew.find_formulae_to_bottle
+  tag = (ARGV.value("tag") || "x86_64_linux").to_sym
+  formulae_to_bottle.reject! do |formula|
+    should_not_build_linux_bottle?(Formula[formula], tag)
+  end
+
+  reason_to_not_build_bottle(Formula[@formula], tag) if ARGV.verbose?
+
+  puts formulae_to_bottle
+end
