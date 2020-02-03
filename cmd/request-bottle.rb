@@ -18,7 +18,7 @@ module Homebrew
 
     raise FormulaUnspecifiedError if Homebrew.args.named.empty?
 
-    formula = Homebrew.args.resolved_formulae
+    formula = Homebrew.args.resolved_formulae.last.full_name
 
     data = { event_type: "bottling", client_payload: { formula: formula } }
     url = "https://api.github.com/repos/Homebrew/linuxbrew-core/dispatches"
