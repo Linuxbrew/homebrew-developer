@@ -53,5 +53,3 @@ module Homebrew
     puts formulae
   end
 end
-
-Homebrew.find_not_bottled

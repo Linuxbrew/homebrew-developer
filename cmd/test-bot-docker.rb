@@ -56,5 +56,3 @@ module Homebrew
     EOS
   end
 end
-
-Homebrew.test_bot_docker

@@ -133,5 +133,3 @@ module Homebrew
     end
   end
 end
-
-Homebrew.merge_homebrew

@@ -116,27 +116,24 @@ module Homebrew
     end
   end
 
-  def migrate_formula(formula)
+  def migrate(formula)
     tap = Tap.new *(Homebrew.args.tap || "homebrew/core").split("/")
     if formula.tap.to_s == tap.to_s
       opoo "#{formula.name} is already in #{tap}"
       return
     end
-    return if open_pull_request? formula, tap
 
-    add_pr = add_formula formula, tap
-    remove_formula formula, tap, add_pr
+    return if open_pull_request?(formula, tap)
+
+    add_pr = add_formula(formula, tap)
+    remove_formula(formula, tap, add_pr)
   end
 
-  def migrate_formulae
+  def migrate_formula
     migrate_formula_args.parse
 
     raise FormulaUnspecifiedError if Homebrew.args.named.empty?
 
-    Homebrew.args.resolved_formulae.each do |formula|
-      migrate_formula formula
-    end
+    migrate(formula)
   end
 end
-
-Homebrew.migrate_formulae

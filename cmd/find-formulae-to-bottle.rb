@@ -79,5 +79,3 @@ module Homebrew
     puts formulae_to_bottle
   end
 end
-
-Homebrew.find_formulae_to_bottle

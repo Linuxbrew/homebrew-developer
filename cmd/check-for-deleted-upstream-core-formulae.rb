@@ -61,5 +61,3 @@ module Homebrew
     end
   end
 end
-
-Homebrew.check_for_deleted_upstream_core_formulae

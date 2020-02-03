@@ -38,7 +38,7 @@ module Homebrew
     EOS
   end
 
-  def announce_formulae
+  def announce
     announce_args.parse
 
     raise FormulaUnspecifiedError if Homebrew.args.named.empty?
@@ -48,5 +48,3 @@ module Homebrew
     end
   end
 end
-
-Homebrew.announce_formulae

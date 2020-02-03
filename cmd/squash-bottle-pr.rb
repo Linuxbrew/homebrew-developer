@@ -54,5 +54,3 @@ module Homebrew
     end
   end
 end
-
-Homebrew.squash_bottle_pr

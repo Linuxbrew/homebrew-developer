@@ -113,5 +113,3 @@ module Homebrew
     build_bottle(formula)
   end
 end
-
-Homebrew.build_bottle_pr
