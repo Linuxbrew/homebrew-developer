@@ -1,39 +1,57 @@
-#:  * `find-not-bottled` [`--must-find=pattern`] [`--must-not-find=pattern`]:
-#:    Outputs a list of formulae that do not have a bottle.
-#:
-#:    If `--must-find=pattern` is passed, match only formulae that contain given pattern.
-#:    If `--must-not-find=pattern` is passed, match only formulae that do not contain given pattern.
+require "cli/parser"
 
 module Homebrew
-  must_find = [
-    ARGV.value("must-find"),
-  ].compact
+  module_function
 
-  must_not_find = [
-    /bottle :unneeded/,
-    /:x86_64_linux/,
-    ARGV.value("must-not-find"),
-  ].compact
-
-  formulae = Dir["#{CoreTap.instance.path}/Formula/*"].map do |formula|
-    content = File.read(formula)
-
-    found = 0
-    must_not_find.each do |pattern|
-      found += 1 if content.match?(pattern)
+  def find_not_bottled_args
+    Homebrew::CLI::Parser.new do
+      usage_banner <<~EOS
+        `find-not-bottled` [`--must-find=pattern`] [`--must-not-find=pattern`]:
+        Outputs a list of formulae that do not have a bottle.
+      EOS
+      flag "--must-find",
+              description: "Match only formulae that do contain the given pattern."
+      flag "--must-not-find",
+              description: "Match only formulae that do not contain the given pattern."
+      max_named 1
     end
+  end
 
-    next if found.positive?
+  def find_not_bottled
+    find_not_bottled_args.parse
 
-    found = must_find.length
-    must_find.each do |pattern|
-      found -= 1 if content.match?(pattern)
-    end
+    must_find = [
+      Homebrew.args.must_find,
+    ].compact
 
-    next if found.positive?
+    must_not_find = [
+      /bottle :unneeded/,
+      /:x86_64_linux/,
+      Homebrew.args.must_not_find,
+    ].compact
 
-    formula.split("/").last.delete_suffix(".rb")
-  end.compact.sort
+    formulae = Dir["#{CoreTap.instance.path}/Formula/*"].map do |formula|
+      content = File.read(formula)
 
-  puts formulae
+      found = 0
+      must_not_find.each do |pattern|
+        found += 1 if content.match?(pattern)
+      end
+
+      next if found.positive?
+
+      found = must_find.length
+      must_find.each do |pattern|
+        found -= 1 if content.match?(pattern)
+      end
+
+      next if found.positive?
+
+      formula.split("/").last.delete_suffix(".rb")
+    end.compact.sort
+
+    puts formulae
+  end
 end
+
+Homebrew.find_not_bottled

@@ -1,14 +1,29 @@
-#:  * `migrate-formula` [--remote=<remote>] [--tap=<tap>] <formulae>:
-#:    Migrate formulae to a new tap.
-#:
-#:    --remote=<remote> Use this GitHub remote, or $HOMEBREW_GITHUB_USER or $USER.
-#:    --tap=<tap> Move formulae to this tap.
+require "cli/parser"
 
 module Homebrew
   module_function
 
+  def migrate_formula_args
+    Homebrew::CLI::Parser.new do
+      usage_banner <<~EOS
+        `migrate-formula` [--remote=<remote>] [--tap=<tap>] <formulae>
+        Migrate formulae to a new tap.
+      EOS
+      flag "--remote",
+            description: "Use this GitHub remote, or $HOMEBREW_GITHUB_USER or $USER."
+      flag "--tap",
+            description: "Move formulae to this tap."
+      switch "--skip-style",
+             description: "Skip running `brew style` on the formula."
+      switch "--skip-audit",
+             description: "Skip running `brew audit` on the formula."
+      switch "--skip-install",
+             description: "Skip installing the formula."
+    end
+  end
+
   def remote
-    ARGV.value("remote") || ENV["HOMEBREW_GITHUB_USER"] || ENV["USER"]
+    Homebrew.args.remote || ENV["HOMEBREW_GITHUB_USER"] || ENV["USER"]
   end
 
   def open_pull_request?(formula, tap)
@@ -49,9 +64,9 @@ module Homebrew
     with_homebrew_path { safe_system *which_editor.split, dest }
 
     full_name = "#{tap}/#{formula.name}"
-    safe_system HOMEBREW_BREW_FILE, "style", full_name unless ARGV.include? "--skip-style"
-    safe_system HOMEBREW_BREW_FILE, "install", "-s", full_name unless ARGV.include? "--skip-install"
-    safe_system HOMEBREW_BREW_FILE, "audit", "--new-formula", full_name unless ARGV.include? "--skip-audit"
+    safe_system HOMEBREW_BREW_FILE, "style", full_name unless Homebrew.args.skip_style?
+    safe_system HOMEBREW_BREW_FILE, "install", "-s", full_name unless Homebrew.args.skip_install?
+    safe_system HOMEBREW_BREW_FILE, "audit", "--new-formula", full_name unless Homebrew.args.skip_audit?
 
     cd dest.dirname do
       branch = "migrate-#{formula.name}"
@@ -102,7 +117,7 @@ module Homebrew
   end
 
   def migrate_formula(formula)
-    tap = Tap.new *(ARGV.value("tap") || "homebrew/core").split("/")
+    tap = Tap.new *(Homebrew.args.tap || "homebrew/core").split("/")
     if formula.tap.to_s == tap.to_s
       opoo "#{formula.name} is already in #{tap}"
       return
@@ -114,9 +129,11 @@ module Homebrew
   end
 
   def migrate_formulae
-    raise FormulaUnspecifiedError if ARGV.named.empty?
+    migrate_formula_args.parse
 
-    ARGV.resolved_formulae.each do |formula|
+    raise FormulaUnspecifiedError if Homebrew.args.named.empty?
+
+    Homebrew.args.resolved_formulae.each do |formula|
       migrate_formula formula
     end
   end
