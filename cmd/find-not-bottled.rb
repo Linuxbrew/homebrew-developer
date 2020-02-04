@@ -6,14 +6,15 @@ module Homebrew
   def find_not_bottled_args
     Homebrew::CLI::Parser.new do
       usage_banner <<~EOS
-        `find-not-bottled` [`--must-find=pattern`] [`--must-not-find=pattern`]:
-        Outputs a list of formulae that do not have a bottle.
+        `find-not-bottled` [`--must-find=`<pattern>] [`--must-not-find=`<pattern>]
+
+        Output a list of formulae that do not have a bottle.
       EOS
-      flag "--must-find",
-              description: "Match only formulae that do contain the given pattern."
-      flag "--must-not-find",
-              description: "Match only formulae that do not contain the given pattern."
-      max_named 1
+      flag   "--must-find=",
+             description: "Match only formulae containing the given pattern."
+      flag   "--must-not-find=",
+             description: "Match only formulae that do not contain the given pattern."
+      max_named 0
     end
   end
 

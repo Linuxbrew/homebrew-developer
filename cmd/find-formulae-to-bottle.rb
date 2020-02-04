@@ -6,13 +6,14 @@ module Homebrew
   def find_formulae_to_bottle_args
     Homebrew::CLI::Parser.new do
       usage_banner <<~EOS
-        `find-formulae-to-bottle` [`--verbose`]:
+        `find-formulae-to-bottle` [`--verbose`]
+
         Find conflicting formulae from the latest merge commit.
-        Outputs a list that can be passed to `brew build-bottle-pr`.
+        Outputs a list that can be passed to `brew request-bottle`.
       EOS
-      switch "--verbose",
+      switch :verbose,
              description: "Print debugging information, e.g. if a formula already has a bottle PR open."
-      max_named 1
+      max_named 0
     end
   end
 

@@ -7,20 +7,21 @@ module Homebrew
   def merge_homebrew_args
     Homebrew::CLI::Parser.new do
       usage_banner <<~EOS
-        `merge-homebrew` [`--core` | `--tap=user/repo`] [<commit>]:
+        `merge-homebrew` (`--core` | `--tap=`<user>`/`<repo>) [<options>] [<commit>]
+
         Merge branch homebrew/master into origin/master.
         If <commit> is passed, merge only up to that upstream SHA-1 commit.
       EOS
-      flag "--tap=",
-           description: "Merge Homebrew/tap into user/tap."
       switch "--core",
-           description: "Merge Homebrew/homebrew-core into Homebrew/linuxbrew-core."
+             description: "Merge Homebrew/homebrew-core into Homebrew/linuxbrew-core."
+      flag   "--tap=",
+             description: "Merge Homebrew/tap into user/tap."
       switch "--browse",
-           description: "Open a web browser for the pull request."
+             description: "Open a web browser for the pull request."
       switch "--skip-style",
-           description: "Skip running `brew style` on merged formulae."
-      max_named 1
+             description: "Skip running `brew style` on merged formulae."
       conflicts "--core", "--tap"
+      max_named 1
     end
   end
 
@@ -45,7 +46,7 @@ module Homebrew
     end_sha1 = Utils.popen_read(git, "rev-parse", sha1).chomp
 
     puts "Start commit: #{start_sha1}"
-    puts "End   commit: #{end_sha1}"
+    puts "  End commit: #{end_sha1}"
 
     args = []
     args << "--ff-only" if fast_forward
@@ -87,8 +88,8 @@ module Homebrew
   # Open a pull request using hub.
   def hub_pull_request(branch, message)
     hub_version = Utils.popen_read("hub", "--version")[/hub version ([0-9.]+)/, 1]
-    odie "Please install hub\n  brew install hub" unless hub_version
-    odie "Please upgrade hub\n  brew upgrade hub" if Version.new(hub_version) < "2.3.0"
+    odie "Please install hub:\n  brew install hub" unless hub_version
+    odie "Please upgrade hub:\n  brew upgrade hub" if Version.new(hub_version) < "2.3.0"
     remote = ENV["HOMEBREW_GITHUB_USER"] || ENV["USER"]
     safe_system git, "push", remote, "HEAD:#{branch}"
     safe_system "hub", "pull-request", "-f", "-h", "#{remote}:#{branch}", "-m", message,

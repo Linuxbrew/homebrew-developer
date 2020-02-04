@@ -6,16 +6,17 @@ module Homebrew
   def check_for_deleted_upstream_core_formulae_args
     Homebrew::CLI::Parser.new do
       usage_banner <<~EOS
-        `check-for-deleted-upstream-core-formulae` [`--homebrew-repo-dir`] [`--linuxbrew-repo-dir`]
-        Outputs a list of formulae (with `.rb` suffix) for further `git rm` usage.
+        `check-for-deleted-upstream-core-formulae` [`--linuxbrew-repo-dir`] [`--homebrew-repo-dir`]
+
+        Output a list of formulae (with `.rb` suffix) for further `git rm` usage.
         If no arguments are passed, use the `master` branch of the core tap as Homebrew/linuxbrew-core,
         and the `homebrew/master` branch as Homebrew/homebrew-core.
       EOS
-      flag "--linuxbrew-repo-dir",
+      flag   "--linuxbrew-repo-dir=",
              description: "Full path to the Homebrew/linuxbrew-core repo on disk."
-      flag "--homebrew-repo-dir",
-            description: "Full path to the Homebrew/homebrew-core repo on disk."
-      max_named 1
+      flag   "--homebrew-repo-dir=",
+             description: "Full path to the Homebrew/homebrew-core repo on disk."
+      max_named 0
     end
   end
 

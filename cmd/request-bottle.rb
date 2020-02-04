@@ -8,8 +8,10 @@ module Homebrew
     Homebrew::CLI::Parser.new do
       usage_banner <<~EOS
         `request-bottle` <formula>
+
         Build a bottle for this formula with GitHub Actions.
       EOS
+      max_named 1
     end
   end
 

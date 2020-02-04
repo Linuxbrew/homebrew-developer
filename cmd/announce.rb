@@ -7,6 +7,7 @@ module Homebrew
     Homebrew::CLI::Parser.new do
       usage_banner <<~EOS
         `announce` <formulae>
+
         Create an announcement for new formulae.
       EOS
     end

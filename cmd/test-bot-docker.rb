@@ -12,6 +12,7 @@ module Homebrew
     Homebrew::CLI::Parser.new do
       usage_banner <<~EOS
         `test-bot-docker` <formulae>
+
         Build a bottle for the specified formulae using a Docker container.
         Runs `brew test-bot` with options.
       EOS
@@ -50,7 +51,7 @@ module Homebrew
 
     oh1 "Done!"
     puts <<~EOS
-      To clean up, run
+      To clean up, run:
         docker rm linuxbrew-test-bot
         rm -rf linuxbrew-test-bot
     EOS

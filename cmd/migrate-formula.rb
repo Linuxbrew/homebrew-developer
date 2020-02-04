@@ -6,13 +6,14 @@ module Homebrew
   def migrate_formula_args
     Homebrew::CLI::Parser.new do
       usage_banner <<~EOS
-        `migrate-formula` [--remote=<remote>] [--tap=<tap>] <formulae>
+        `migrate-formula` [`--remote=`<remote>] [`--tap=`<tap>] [<options>] <formulae>
+
         Migrate formulae to a new tap.
       EOS
-      flag "--remote",
-            description: "Use this GitHub remote, or $HOMEBREW_GITHUB_USER or $USER."
-      flag "--tap",
-            description: "Move formulae to this tap."
+      flag   "--remote=",
+             description: "Use this GitHub remote, or $HOMEBREW_GITHUB_USER or $USER."
+      flag   "--tap=",
+             description: "Move formulae to this tap."
       switch "--skip-style",
              description: "Skip running `brew style` on the formula."
       switch "--skip-audit",
