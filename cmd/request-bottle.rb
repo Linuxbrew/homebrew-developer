@@ -11,6 +11,8 @@ module Homebrew
 
         Build a bottle for this formula with GitHub Actions.
       EOS
+      switch "--ignore-errors",
+             description: "Instruct the workflow action to ignore e.g., audit errors and upload bottles if they exist."
       max_named 1
     end
   end
@@ -29,7 +31,7 @@ module Homebrew
     raise FormulaUnspecifiedError if Homebrew.args.named.empty?
 
     formula = Homebrew.args.resolved_formulae.last.full_name
-    payload = { formula: formula, name: git_user, email: git_email }
+    payload = { formula: formula, name: git_user, email: git_email, ignore_errors: Homebrew.args.ignore_errors? }
     data = { event_type: "bottling", client_payload: payload }
     url = "https://api.github.com/repos/Homebrew/linuxbrew-core/dispatches"
     GitHub.open_api(url, data: data, request_method: :POST, scopes: ["repo"])
