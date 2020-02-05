@@ -97,6 +97,14 @@ module Homebrew
       *("--browse" if Homebrew.args.browse?)
   end
 
+  def added_files_after_merge
+    Utils.popen_read(git, "diff", "--name-only", "--diff-filter=A", "HEAD~1..HEAD").split
+  end
+
+  def deleted_files_after_merge
+    Utils.popen_read(git, "diff", "--name-only", "--diff-filter=D", "HEAD~1..HEAD").split
+  end
+
   def merge_core
     oh1 "Merging Homebrew/homebrew-core into Homebrew/linuxbrew-core"
     cd(CoreTap.instance.path) do
@@ -107,6 +115,19 @@ module Homebrew
       sha1 = Utils.popen_read(git, "rev-parse", "--short", homebrew_commits.last).chomp
       branch = "merge-#{Date.today}-#{sha1}"
       message = "Merge #{Date.today} #{sha1}\n\nMerge Homebrew/homebrew-core into Homebrew/linuxbrew-core\n\n" + conflicts.map { |s| "+ [ ] #{s}\n" }.join
+
+      added_files = added_files_after_merge
+      unless added_files.empty?
+        ohai "Added formulae"
+        puts added_files
+      end
+
+      deleted_files = deleted_files_after_merge
+      unless deleted_files.empty?
+        ohai "Deleted formulae"
+        puts deleted_files
+      end
+
       hub_pull_request branch, message
     end
   end
