@@ -17,12 +17,24 @@ module Homebrew
     end
   end
 
+  def head_is_merge_commit?
+    Utils.popen_read("git", "log", "--merges", "-1", "--format=%H").chomp == Utils.popen_read("git", "rev-parse", "HEAD").chomp
+  end
+
   def git_user
-    ENV["HOMEBREW_GIT_NAME"] || ENV["GIT_AUTHOR_NAME"] || ENV["GIT_COMMITTER_NAME"] || Utils.popen_read(Utils.git_path, "config", "--get", "user.name").strip
+    Utils.popen_read(Utils.git_path, "log", "-1", "--pretty=%an") if ENV['CI'] && head_is_merge_commit? \
+      || ENV["HOMEBREW_GIT_NAME"] \
+      || ENV["GIT_AUTHOR_NAME"] \
+      || ENV["GIT_COMMITTER_NAME"] \
+      || Utils.popen_read(Utils.git_path, "config", "--get", "user.name")
   end
 
   def git_email
-    ENV["HOMEBREW_GIT_EMAIL"] || ENV["GIT_AUTHOR_EMAIL"] || ENV["GIT_COMMITTER_EMAIL"] || Utils.popen_read(Utils.git_path, "config", "--get", "user.email").strip
+    Utils.popen_read(Utils.git_path, "log", "-1", "--pretty=%ae") if ENV['CI'] && head_is_merge_commit? \
+      || ENV["HOMEBREW_GIT_EMAIL"] \
+      || ENV["GIT_AUTHOR_EMAIL"] \
+      || ENV["GIT_COMMITTER_EMAIL"] \
+      || Utils.popen_read(Utils.git_path, "config", "--get", "user.email")
   end
 
   def request_bottle
@@ -30,8 +42,8 @@ module Homebrew
 
     raise FormulaUnspecifiedError if Homebrew.args.named.empty?
 
-    user = git_user
-    email = git_email
+    user = git_user.strip
+    email = git_email.strip
 
     odie "User not specified" if user.empty?
     odie "Email not specified" if email.empty?
