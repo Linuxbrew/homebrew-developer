@@ -18,7 +18,7 @@ module Homebrew
   end
 
   def head_is_merge_commit?
-    Utils.popen_read("git", "log", "--merges", "-1", "--format=%H").chomp == Utils.popen_read("git", "rev-parse", "HEAD").chomp
+    Utils.popen_read(Utils.git_path, "log", "--merges", "-1", "--format=%H").chomp == Utils.popen_read(Utils.git_path, "rev-parse", "HEAD").chomp
   end
 
   def git_user
