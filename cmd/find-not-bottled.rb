@@ -27,6 +27,7 @@ module Homebrew
 
     must_not_find = [
       /bottle :unneeded/,
+      /depends_on :xcode/,
       /:x86_64_linux/,
       Homebrew.args.must_not_find,
     ].compact
