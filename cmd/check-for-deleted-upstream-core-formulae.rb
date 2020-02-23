@@ -25,7 +25,7 @@ module Homebrew
   end
 
   def linux_only?(formula)
-    File.read("#{linuxbrew_repo_dir}/Formula/#{formula}").match("# tag \"linux\"")
+    File.read("#{linuxbrew_repo_dir}/Formula/#{formula}").match("depends_on :linux")
   end
 
   def homebrew_repo_dir
