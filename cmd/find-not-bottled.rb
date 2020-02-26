@@ -14,6 +14,8 @@ module Homebrew
              description: "Match only formulae containing the given pattern."
       flag   "--must-not-find=",
              description: "Match only formulae that do not contain the given pattern."
+      flag   "--tap=",
+             description: "Specify a tap rather than the default #{CoreTap.instance.name}."
       max_named 0
     end
   end
@@ -32,7 +34,10 @@ module Homebrew
       Homebrew.args.must_not_find,
     ].compact
 
-    formulae = Dir["#{CoreTap.instance.path}/Formula/*"].map do |formula|
+    tap = Tap.fetch(args.tap || CoreTap.instance.name)
+    onoe "#{tap.name} is not installed! Try running: brew tap #{tap.name}" unless tap.installed?
+
+    formulae = Dir["#{tap.path}/Formula/*"].map do |formula|
       content = File.read(formula)
 
       found = 0
