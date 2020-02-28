@@ -9,11 +9,10 @@ module Homebrew
       usage_banner <<~EOS
         `request-bottle` <formula>
 
-        Build a bottle for this formula with GitHub Actions.
+        Build bottles for these formulae with GitHub Actions.
       EOS
       switch "--ignore-errors",
              description: "Instruct the workflow action to ignore e.g., audit errors and upload bottles if they exist."
-      max_named 1
     end
   end
 
@@ -48,10 +47,11 @@ module Homebrew
     odie "User not specified" if user.empty?
     odie "Email not specified" if email.empty?
 
-    formula = Homebrew.args.resolved_formulae.last.full_name
-    payload = { formula: formula, name: user, email: email, ignore_errors: Homebrew.args.ignore_errors? }
-    data = { event_type: "bottling", client_payload: payload }
-    url = "https://api.github.com/repos/Homebrew/linuxbrew-core/dispatches"
-    GitHub.open_api(url, data: data, request_method: :POST, scopes: ["repo"])
+    Homebrew.args.resolved_formulae.each do |formula|
+      payload = { formula: formula.name, name: user, email: email, ignore_errors: Homebrew.args.ignore_errors? }
+      data = { event_type: "bottling", client_payload: payload }
+      url = "https://api.github.com/repos/Homebrew/linuxbrew-core/dispatches"
+      GitHub.open_api(url, data: data, request_method: :POST, scopes: ["repo"])
+    end
   end
 end
