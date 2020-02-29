@@ -7,7 +7,7 @@ module Homebrew
   def request_bottle_args
     Homebrew::CLI::Parser.new do
       usage_banner <<~EOS
-        `request-bottle` <formula>
+        `request-bottle` <formula> [<formula> ...]
 
         Build bottles for these formulae with GitHub Actions.
       EOS
