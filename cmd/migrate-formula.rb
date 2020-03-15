@@ -62,7 +62,7 @@ module Homebrew
     end
 
     puts "Editing #{dest}"
-    with_homebrew_path { safe_system *which_editor.split, dest }
+    with_homebrew_path { safe_system(*which_editor.split, dest) }
 
     full_name = "#{tap}/#{formula.name}"
     safe_system HOMEBREW_BREW_FILE, "style", full_name unless Homebrew.args.skip_style?
@@ -99,7 +99,7 @@ module Homebrew
 
       if tap.user == "homebrew" || tap.user == formula.tap.user
         tap_migrations_path = formula.tap.path/"tap_migrations.json"
-        tap_migrations = tap_migrations_path.readlines.each &:chomp!
+        tap_migrations = tap_migrations_path.readlines.each(&:chomp!)
         tap_migrations.reject! { |s| %w[{ }].include? s }
         tap_migrations.each { |s| s.chomp! "," }
         tap_migrations << "  \"#{formula.name}\": \"#{tap}\""
@@ -118,7 +118,7 @@ module Homebrew
   end
 
   def migrate(formula)
-    tap = Tap.new *(Homebrew.args.tap || "homebrew/core").split("/")
+    tap = Tap.new(*(Homebrew.args.tap || "homebrew/core")).split("/")
     if formula.tap.to_s == tap.to_s
       opoo "#{formula.name} is already in #{tap}"
       return

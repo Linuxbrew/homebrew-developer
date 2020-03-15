@@ -72,7 +72,7 @@ module Homebrew
     if mergetool?
       safe_system "git", "mergetool"
     else
-      safe_system *editor, *conflicts
+      safe_system(*editor, *conflicts)
     end
     safe_system HOMEBREW_BREW_FILE, "style", *conflicts unless Homebrew.args.skip_style?
     safe_system git, "diff", "--check"
