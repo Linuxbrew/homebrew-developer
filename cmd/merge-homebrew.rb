@@ -129,6 +129,8 @@ module Homebrew
         puts deleted_files
       end
 
+      safe_system("brew", "readall", "--aliases")
+
       hub_pull_request branch, message
     end
   end
