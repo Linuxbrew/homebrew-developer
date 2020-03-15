@@ -12,19 +12,23 @@ module Homebrew
         Build bottles for these formulae with GitHub Actions.
       EOS
       switch "--ignore-errors",
-             description: "Instruct the workflow action to ignore e.g., audit errors and upload bottles if they exist."
+             description: "Make the workflow action ignore e.g., audit errors and upload bottles if they exist."
     end
   end
 
   def head_is_merge_commit?
-    Utils.popen_read(Utils.git_path, "log", "--merges", "-1", "--format=%H").chomp == Utils.popen_read(Utils.git_path, "rev-parse", "HEAD").chomp
+    Utils.popen_read(Utils.git_path, "log", "--merges", "-1", "--format=%H").chomp \
+      == Utils.popen_read(Utils.git_path, "rev-parse", "HEAD").chomp
   end
 
   def git_user
     if ENV["CI"] && head_is_merge_commit?
       Utils.popen_read(Utils.git_path, "log", "-1", "--pretty=%an")
     else
-      ENV["HOMEBREW_GIT_NAME"] || ENV["GIT_AUTHOR_NAME"] || ENV["GIT_COMMITTER_NAME"] || Utils.popen_read(Utils.git_path, "config", "--get", "user.name")
+      ENV["HOMEBREW_GIT_NAME"] ||
+        ENV["GIT_AUTHOR_NAME"] ||
+        ENV["GIT_COMMITTER_NAME"] ||
+        Utils.popen_read(Utils.git_path, "config", "--get", "user.name")
     end
   end
 
@@ -32,7 +36,10 @@ module Homebrew
     if ENV["CI"] && head_is_merge_commit?
       Utils.popen_read(Utils.git_path, "log", "-1", "--pretty=%ae")
     else
-      ENV["HOMEBREW_GIT_EMAIL"] || ENV["GIT_AUTHOR_EMAIL"] || ENV["GIT_COMMITTER_EMAIL"] || Utils.popen_read(Utils.git_path, "config", "--get", "user.email")
+      ENV["HOMEBREW_GIT_EMAIL"] ||
+        ENV["GIT_AUTHOR_EMAIL"] ||
+        ENV["GIT_COMMITTER_EMAIL"] ||
+        Utils.popen_read(Utils.git_path, "config", "--get", "user.email")
     end
   end
 

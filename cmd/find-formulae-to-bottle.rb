@@ -22,7 +22,8 @@ module Homebrew
   end
 
   def head_is_merge_commit?
-    Utils.popen_read("git", "log", "--merges", "-1", "--format=%H").chomp == Utils.popen_read("git", "rev-parse", "HEAD").chomp
+    Utils.popen_read("git", "log", "--merges", "-1", "--format=%H").chomp \
+      == Utils.popen_read("git", "rev-parse", "HEAD").chomp
   end
 
   def head_has_conflict_lines?(commit_message)
@@ -50,7 +51,10 @@ module Homebrew
     return opoo "#{formula}: Skipping because a bottle is not needed" if formula.bottle_unneeded?
     return opoo "#{formula}: Skipping because bottles are disabled" if formula.bottle_disabled?
     return opoo "#{formula}: Skipping because it has a bottle already" if formula.bottle_specification.tag?(tag)
-    return opoo "#{formula}: Skipping because #{formula.tap} does not support Linux" if slug(formula.tap) == "Homebrew/homebrew-core"
+
+    if slug(formula.tap) == "Homebrew/homebrew-core"
+      opoo "#{formula}: Skipping because #{formula.tap} does not support Linux"
+    end
   end
 
   def find_formulae_to_bottle
@@ -61,7 +65,9 @@ module Homebrew
 
     odie "You need to be on the master branch to run this." unless on_master?
     odie "HEAD is not a merge commit." unless head_is_merge_commit?
-    odie "HEAD does not have any bottles to build for new versions." unless head_has_conflict_lines?(latest_merge_commit_message)
+    unless head_has_conflict_lines?(latest_merge_commit_message)
+      odie "HEAD does not have any bottles to build for new versions."
+    end
 
     latest_merge_commit_message.each_line do |line|
       line.strip!

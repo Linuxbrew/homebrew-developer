@@ -114,7 +114,8 @@ module Homebrew
       conflicts = conflict_files.map { |s| s.gsub(%r{^Formula/|\.rb$}, "") }
       sha1 = Utils.popen_read(git, "rev-parse", "--short", homebrew_commits.last).chomp
       branch = "merge-#{Date.today}-#{sha1}"
-      message = "Merge #{Date.today} #{sha1}\n\nMerge Homebrew/homebrew-core into Homebrew/linuxbrew-core\n\n" + conflicts.map { |s| "+ [ ] #{s}\n" }.join
+      merge_title = "Merge Homebrew/homebrew-core into Homebrew/linuxbrew-core"
+      message = "Merge #{Date.today} #{sha1}\n#{merge_title}\n\n" + conflicts.map { |s| "+ [ ] #{s}\n" }.join
 
       added_files = added_files_after_merge
       unless added_files.empty?
