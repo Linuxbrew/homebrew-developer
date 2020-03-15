@@ -18,8 +18,8 @@ module Homebrew
              description: "Merge Homebrew/tap into user/tap."
       switch "--browse",
              description: "Open a web browser for the pull request."
-      switch "--skip-style",
-             description: "Skip running `brew style` on merged formulae."
+      switch "--style",
+             description: "Run `brew style` on merged formulae."
       conflicts "--core", "--tap"
       max_named 1
     end
@@ -74,7 +74,7 @@ module Homebrew
     else
       safe_system(*editor, *conflicts)
     end
-    safe_system HOMEBREW_BREW_FILE, "style", *conflicts unless Homebrew.args.skip_style?
+    safe_system HOMEBREW_BREW_FILE, "style", *conflicts if Homebrew.args.style?
     safe_system git, "diff", "--check"
     safe_system git, "add", "--", *conflicts
     conflicts
