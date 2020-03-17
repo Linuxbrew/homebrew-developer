@@ -7,12 +7,14 @@ module Homebrew
   def request_bottle_args
     Homebrew::CLI::Parser.new do
       usage_banner <<~EOS
-        `request-bottle` <formula> [<formula> ...]
+        `request-bottle` [<options>] <formula> [<formula> ...]
 
         Build bottles for these formulae with GitHub Actions.
       EOS
       switch "--ignore-errors",
              description: "Make the workflow action ignore e.g., audit errors and upload bottles if they exist."
+      flag "--issue=",
+        description: "If specified, post a comment to this issue number if the request-bottle job fails."
     end
   end
 
@@ -55,7 +57,11 @@ module Homebrew
     odie "Email not specified" if email.empty?
 
     Homebrew.args.resolved_formulae.each do |formula|
-      payload = { formula: formula.name, name: user, email: email, ignore_errors: Homebrew.args.ignore_errors? }
+      payload = { formula:       formula.name,
+                  name:          user,
+                  email:         email,
+                  ignore_errors: Homebrew.args.ignore_errors?,
+                  issue:         Homebrew.args.issue }
       data = { event_type: "bottling", client_payload: payload }
       url = "https://api.github.com/repos/Homebrew/linuxbrew-core/dispatches"
       GitHub.open_api(url, data: data, request_method: :POST, scopes: ["repo"])
