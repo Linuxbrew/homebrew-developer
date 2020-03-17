@@ -61,7 +61,7 @@ module Homebrew
                   name:          user,
                   email:         email,
                   ignore_errors: Homebrew.args.ignore_errors?,
-                  issue:         Homebrew.args.issue }
+                  issue:         Homebrew.args.issue || 0 }
       data = { event_type: "bottling", client_payload: payload }
       url = "https://api.github.com/repos/Homebrew/linuxbrew-core/dispatches"
       GitHub.open_api(url, data: data, request_method: :POST, scopes: ["repo"])
