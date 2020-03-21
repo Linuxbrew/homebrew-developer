@@ -57,12 +57,15 @@ module Homebrew
     odie "Email not specified" if email.empty?
 
     Homebrew.args.resolved_formulae.each do |formula|
+      event_name = formula.name.to_s
+      event_name += " (##{Homebrew.args.issue})" if Homebrew.args.issue
+
       payload = { formula:       formula.name,
                   name:          user,
                   email:         email,
                   ignore_errors: Homebrew.args.ignore_errors?,
                   issue:         Homebrew.args.issue || 0 }
-      data = { event_type: "bottling", client_payload: payload }
+      data = { event_type: event_name, client_payload: payload }
       url = "https://api.github.com/repos/Homebrew/linuxbrew-core/dispatches"
       GitHub.open_api(url, data: data, request_method: :POST, scopes: ["repo"])
     end
