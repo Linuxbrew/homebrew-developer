@@ -1,5 +1,6 @@
 require "cli/parser"
 require "utils/github"
+require "utils/tty"
 require "mktemp"
 
 module Homebrew
@@ -22,6 +23,8 @@ module Homebrew
         description: "Print only the logs or error if occurred, nothing more."
       switch "--keep-tmp",
         description: "Retain the temporary directory containing the downloaded workflow."
+      switch "--markdown",
+        description: "Format the output using Markdown."
       switch :verbose
       switch :debug
       named 1
@@ -46,8 +49,10 @@ module Homebrew
     # One of the border lines weren't found
     return [] if pairs.empty?
 
-    # Remove timestamp prefix on every line
+    # Remove timestamp prefix on every line and optionally control codes
+    strip_ansi = Homebrew.args.markdown? || !Tty.color?
     content.map! do |line|
+      line = Tty.strip_ansi(line) if strip_ansi
       line.split(" ")[1..-1]&.join(" ")
     end
 
@@ -119,8 +124,22 @@ module Homebrew
       safe_system("unzip", "-qq", "-d", tmpdir, file)
       Dir["#{tmpdir}/*.txt"].each do |f|
         get_failed_lines(f).each do |command, contents|
-          puts command
-          puts contents
+          if Homebrew.args.markdown?
+            puts <<~EOMARKDOWN
+              <details>
+              <summary>#{command}</summary>
+
+              ```
+              #{contents.join "\n"}
+              ```
+
+              </details>
+
+            EOMARKDOWN
+          else
+            puts command
+            puts contents
+          end
         end
       end
     end
