@@ -87,6 +87,7 @@ module Homebrew
         url = "https://api.github.com/repos/#{repo}/commits/#{run["head_sha"]}"
         response = GitHub.open_api(url, request_method: :GET, scopes: ["repo"])
         commit_files = response["files"].map { |f| f["filename"] }
+        odebug "Run ##{run["id"]} - #{commit_files.join ", "}"
         commit_files.find do |file|
           file[%r{Formula/(.+)\.rb}, 1] == formula.name
         end
