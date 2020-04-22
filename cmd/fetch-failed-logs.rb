@@ -28,24 +28,23 @@ module Homebrew
     end
   end
 
-  def print_failed_logs(file)
+  def get_failed_lines(file)
     # Border lines indexes
     brew_index = -1
-    failed_index = -1
+    pairs = []
 
     # Find indexes of border lines
     content = File.read(file).lines
     content.each_with_index do |line, index|
       if /.*==> .*FAILED.*/.match?(line)
-        failed_index = index
-        break
+        pairs << [brew_index, index]
       elsif /.*==>.* .*brew .+/.match?(line)
         brew_index = index
       end
     end
 
     # One of the border lines weren't found
-    return if brew_index.negative? || failed_index.negative?
+    return [] if pairs.empty?
 
     # Remove timestamp prefix on every line
     content.map! do |line|
@@ -53,7 +52,11 @@ module Homebrew
     end
 
     # Print only interesting lines
-    puts content[brew_index..failed_index]
+    pairs.map do |first, last|
+      headline = content[first]
+      contents = content[(first + 1)..last]
+      [headline, contents]
+    end
   end
 
   def fetch_failed_logs
@@ -115,7 +118,10 @@ module Homebrew
       File.write(file, response)
       safe_system("unzip", "-qq", "-d", tmpdir, file)
       Dir["#{tmpdir}/*.txt"].each do |f|
-        print_failed_logs f
+        get_failed_lines(f).each do |command, contents|
+          puts command
+          puts contents
+        end
       end
     end
   end
