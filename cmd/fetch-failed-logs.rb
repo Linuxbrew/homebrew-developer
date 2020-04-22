@@ -1,5 +1,6 @@
 require "cli/parser"
 require "utils/github"
+require "mktemp"
 
 module Homebrew
   module_function
@@ -19,6 +20,8 @@ module Homebrew
         description: "Search through workflow runs triggered by repository_dispatch event."
       switch "--quiet",
         description: "Print only the logs or error if occurred, nothing more."
+      switch "--keep-tmp",
+        description: "Retain the temporary directory containing the downloaded workflow."
       switch :verbose
       switch :debug
       named 1
@@ -106,7 +109,8 @@ module Homebrew
     # extract it there and print
     url = workflow_run["logs_url"]
     response = GitHub.open_api(url, request_method: :GET, scopes: ["repo"], parse_json: false)
-    Dir.mktmpdir do |tmpdir|
+    Mktemp.new("brewlogs-#{formula.name}", retain: Homebrew.args.keep_tmp?).run do |context|
+      tmpdir = context.tmpdir
       file = "#{tmpdir}/logs.zip"
       File.write(file, response)
       safe_system("unzip", "-qq", "-d", tmpdir, file)
