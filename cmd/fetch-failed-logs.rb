@@ -62,7 +62,7 @@ module Homebrew
     repo = Tap.fetch(tap_name).full_name
 
     # First get latest workflow runs
-    url = "https://api.github.com/repos/#{repo}/actions/runs?status=failure&event=#{event}"
+    url = "https://api.github.com/repos/#{repo}/actions/runs?status=failure&event=#{event}&per_page=100"
     response = GitHub.open_api(url, request_method: :GET, scopes: ["repo"])
     workflow_runs = response["workflow_runs"]
 
