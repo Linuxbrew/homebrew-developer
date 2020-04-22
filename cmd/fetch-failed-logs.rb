@@ -19,6 +19,9 @@ module Homebrew
         description: "Search through workflow runs triggered by repository_dispatch event."
       switch "--quiet",
         description: "Print only the logs or error if occurred, nothing more."
+      switch :verbose
+      switch :debug
+      named 1
     end
   end
 
@@ -52,8 +55,6 @@ module Homebrew
 
   def fetch_failed_logs
     fetch_failed_logs_args.parse
-
-    raise FormulaUnspecifiedError if Homebrew.args.named.empty?
 
     formula = Homebrew.args.resolved_formulae.first
     event = Homebrew.args.dispatched? ? "repository_dispatch" : "pull_request"
