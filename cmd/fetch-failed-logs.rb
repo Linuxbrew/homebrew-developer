@@ -64,6 +64,61 @@ module Homebrew
     end
   end
 
+  def find_dispatch_workflow(formula, repo)
+    # If the workflow run was triggered by a repository dispatch event, then
+    # check if any step name in all its jobs is equal to formula
+    url = "https://api.github.com/repos/#{repo}/actions/runs?status=failure&event=repository_dispatch&per_page=100"
+    GitHub.open_api(url, scopes: ["repo"])["workflow_runs"].find do |run|
+      url = run["jobs_url"]
+      response = GitHub.open_api(url, scopes: ["repo"])
+      jobs = response["jobs"]
+      jobs.find do |job|
+        steps = job["steps"]
+        steps.find do |step|
+          step["name"].match(formula.name)
+        end
+      end
+    end
+  end
+
+  def find_pull_request_workflow(formula, repo)
+    # Find all open pull requests and the files they modify
+    url = "https://api.github.com/graphql"
+    owner, name = repo.split("/")
+    data = {
+      query: <<~EOS,
+        {
+          repository(name: "#{name}", owner: "#{owner}") {
+            pullRequests(first: 100, states: OPEN, orderBy: {field: CREATED_AT, direction: DESC}) {
+              edges {
+                node {
+                  number
+                  files(first: 100) {
+                    nodes {
+                      path
+                    }
+                  }
+                  headRefName
+                }
+              }
+            }
+          }
+        }
+      EOS
+    }
+    resp = GitHub.open_api(url, data: data, request_method: "POST")["data"]["repository"]["pullRequests"]["edges"]
+    # Find pull requests that modified files we're interested in
+    pr = resp.find do |r|
+      r["node"]["files"]["nodes"].find do |f|
+        f["path"][%r{Formula/(.+)\.rb}, 1] == formula.name
+      end
+    end
+    # Find failed workflows associated with the pull request
+    branch = pr["node"]["headRefName"]
+    url = "https://api.github.com/repos/#{repo}/actions/runs?status=failure&event=pull_request&branch=#{branch}"
+    GitHub.open_api(url, scopes: ["repo"])["workflow_runs"].first
+  end
+
   def fetch_failed_logs
     fetch_failed_logs_args.parse
 
@@ -72,37 +127,10 @@ module Homebrew
     tap_name = Homebrew.args.tap || CoreTap.instance.name
     repo = Tap.fetch(tap_name).full_name
 
-    # First get latest workflow runs
-    url = "https://api.github.com/repos/#{repo}/actions/runs?status=failure&event=#{event}&per_page=100"
-    response = GitHub.open_api(url, request_method: :GET, scopes: ["repo"])
-    workflow_runs = response["workflow_runs"]
-
-    # Then iterate over them and find the matching one...
-    workflow_run = workflow_runs.find do |run|
-      # If the workflow run was triggered by a repository dispatch event, then
-      # check if any step name in all its jobs is equal to formula
-      if run["event"] == "repository_dispatch"
-        url = run["jobs_url"]
-        response = GitHub.open_api(url, request_method: :GET, scopes: ["repo"])
-        jobs = response["jobs"]
-        jobs.find do |job|
-          steps = job["steps"]
-          steps.find do |step|
-            step["name"].match(formula.name)
-          end
-        end
-      # If the workflow run was triggered by a pull request event, then
-      # fetch the head commit, determine which file changed and
-      # check if equal to formula
-      elsif run["event"] == "pull_request"
-        url = "https://api.github.com/repos/#{repo}/commits/#{run["head_sha"]}"
-        response = GitHub.open_api(url, request_method: :GET, scopes: ["repo"])
-        commit_files = response["files"].map { |f| f["filename"] }
-        odebug "Run ##{run["id"]} - #{commit_files.join ", "}"
-        commit_files.find do |file|
-          file[%r{Formula/(.+)\.rb}, 1] == formula.name
-        end
-      end
+    workflow_run = if event == "repository_dispatch"
+      find_dispatch_workflow formula, repo
+    elsif event == "pull_request"
+      find_pull_request_workflow formula, repo
     end
 
     odie "No workflow run matching the criteria was found" unless workflow_run
