@@ -16,12 +16,14 @@ jobs:
       HOMEBREW_NO_AUTO_UPDATE: 1
     steps:
       - name: Checkout
-        uses: actions/checkout@v1
+        uses: actions/checkout@v2
       - name: Update
         run: brew update-reset "$(brew --repository)"
       - name: Setup
         run: |
           mkdir -p "$(dirname $(brew --repository ${{github.repository}}))"
           cp -a "$PWD" "$(brew --repository ${{github.repository}})"
-      - name: Test
-        run: brew style "${{github.repository}}"
+      - name: Run brew test-bot --only-tap-syntax
+        run: |
+          brew tap homebrew/test-bot
+          brew test-bot --only-tap-syntax
