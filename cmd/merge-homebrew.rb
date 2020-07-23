@@ -72,6 +72,10 @@ module Homebrew
           # Now inside a merge conflict.
           # Skip top part of merge conflict.
           next if l == "<<<<<<< HEAD\n" .. l == "=======\n"
+
+          # Remove `cellar :any`, etc. lines.
+          next if l.include? "cellar"
+
           # Remove trailing bit of merge conflict.
           next if l == ">>>>>>> homebrew/master\n"
         end
