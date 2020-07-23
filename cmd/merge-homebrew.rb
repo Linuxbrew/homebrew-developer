@@ -106,8 +106,22 @@ module Homebrew
   end
 
   def merge_core
+    core_tap = if OS.linux?
+      CoreTap.instance.path
+    else
+      taps = Tap.each.select { |t| t.remote =~ %r{github.com[/:]homebrew/linuxbrew-core}i }
+      if taps.count > 1
+        odie <<~EOS
+          Multiple taps with a Homebrew/linuxbrew-core remote found!
+          #{taps.map(&:path).join("\n")}
+        EOS
+      end
+      taps.first.path
+    end
+
     oh1 "Merging Homebrew/homebrew-core into Homebrew/linuxbrew-core"
-    cd(CoreTap.instance.path) do
+    ohai "Using #{core_tap}" if core_tap != CoreTap.instance.path
+    cd core_tap do
       git_merge
       conflict_files = resolve_conflicts
       safe_system git, "commit" unless conflict_files.empty?
