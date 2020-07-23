@@ -17,9 +17,10 @@ module Homebrew
     contents = formula.path.read
     cite = contents[/# cite .*"(.*)"/, 1]
 
-    os = if contents.match?(/depends_on :linux$/)
+    os = case contents
+    when /depends_on :linux$/
       "Linux"
-    elsif contents.match?(/depends_on :macos$/)
+    when /depends_on :macos$/
       "macOS"
     else
       "Linux and macOS"
