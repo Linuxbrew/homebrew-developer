@@ -17,7 +17,7 @@ module Homebrew
   end
 
   def merge_commit?(url)
-    pr_number = url[%r{/pull\/([0-9]+)}, 1]
+    pr_number = url[%r{/pull/([0-9]+)}, 1]
     return false unless pr_number
 
     safe_system "git", "fetch", "--quiet", "homebrew", "pull/#{pr_number}/head"
