@@ -63,9 +63,31 @@ module Homebrew
     homebrew_commits.each { |sha1| git_merge_commit sha1, fast_forward: fast_forward }
   end
 
+  def fix_bottle_merge_conflicts!(file)
+    # rubocop:disable Style/DisableCopsWithinSourceCodeDirective, Lint/FlipFlop
+    new_contents = File.read(file).lines.map do |l|
+      if l == "  bottle do\n" .. l == "  end\n"
+        # Now inside a bottle block.
+        if l == "<<<<<<< HEAD\n" .. l == ">>>>>>> homebrew/master\n"
+          # Now inside a merge conflict.
+          # Skip top part of merge conflict.
+          next if l == "<<<<<<< HEAD\n" .. l == "=======\n"
+          # Remove trailing bit of merge conflict.
+          next if l == ">>>>>>> homebrew/master\n"
+        end
+      end
+      l
+    end.compact.join
+    # rubocop:enable Lint/FlipFlop, Style/DisableCopsWithinSourceCodeDirective
+
+    File.atomic_write(file) { |f| f.write(new_contents) }
+  end
+
   def resolve_conflicts
     conflicts = Utils.popen_read(git, "diff", "--name-only", "--diff-filter=U").split
     return conflicts if conflicts.empty?
+
+    conflicts.each { |f| fix_bottle_merge_conflicts! f }
 
     oh1 "Conflicts"
     puts conflicts.join(" ")
