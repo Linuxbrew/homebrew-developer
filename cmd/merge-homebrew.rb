@@ -110,13 +110,20 @@ module Homebrew
       CoreTap.instance.path
     else
       taps = Tap.each.select { |t| t.remote =~ %r{github.com[/:]homebrew/linuxbrew-core}i }
-      if taps.count > 1
+      case taps.count
+      when 0
+        odie <<~EOS
+          You need a tap with a Homebrew/linuxbrew-core remote! Try:
+            brew tap homebrew/linux https://github.com/Homebrew/linuxbrew-core
+        EOS
+      when 1
+        taps.first.path
+      else
         odie <<~EOS
           Multiple taps with a Homebrew/linuxbrew-core remote found!
           #{taps.map(&:path).join("\n")}
         EOS
       end
-      taps.first.path
     end
 
     oh1 "Merging Homebrew/homebrew-core into Homebrew/linuxbrew-core"
