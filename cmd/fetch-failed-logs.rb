@@ -39,9 +39,10 @@ module Homebrew
     # Find indexes of border lines
     content = File.read(file).lines
     content.each_with_index do |line, index|
-      if /.*==> .*FAILED.*/.match?(line)
+      case line
+      when /.*==> .*FAILED.*/
         pairs << [brew_index, index]
-      elsif /.*==>.* .*brew .+/.match?(line)
+      when /.*==>.* .*brew .+/
         brew_index = index
       end
     end
@@ -53,7 +54,7 @@ module Homebrew
     strip_ansi = Homebrew.args.markdown? || !Tty.color?
     content.map! do |line|
       line = Tty.strip_ansi(line) if strip_ansi
-      line.split(" ")[1..-1]&.join(" ")
+      line.split(" ")[1..]&.join(" ")
     end
 
     # Print only interesting lines
@@ -81,7 +82,8 @@ module Homebrew
     workflow_run = workflow_runs.find do |run|
       # If the workflow run was triggered by a repository dispatch event, then
       # check if any step name in all its jobs is equal to formula
-      if run["event"] == "repository_dispatch"
+      case run["event"]
+      when "repository_dispatch"
         url = run["jobs_url"]
         response = GitHub.open_api(url, request_method: :GET, scopes: ["repo"])
         jobs = response["jobs"]
@@ -94,7 +96,7 @@ module Homebrew
       # If the workflow run was triggered by a pull request event, then
       # fetch the head commit, determine which file changed and
       # check if equal to formula
-      elsif run["event"] == "pull_request"
+      when "pull_request"
         url = "https://api.github.com/repos/#{repo}/commits/#{run["head_sha"]}"
         response = GitHub.open_api(url, request_method: :GET, scopes: ["repo"])
         commit_files = response["files"].map { |f| f["filename"] }
