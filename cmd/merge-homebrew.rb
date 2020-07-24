@@ -4,6 +4,10 @@ require "date"
 module Homebrew
   module_function
 
+  CONFLICT_START = /^<{7,} /.freeze
+  CONFLICT_BOUNDARY = /^={7,}/.freeze
+  CONFLICT_END = /^>{7,} /.freeze
+
   def merge_homebrew_args
     Homebrew::CLI::Parser.new do
       usage_banner <<~EOS
@@ -65,22 +69,22 @@ module Homebrew
 
   def fix_bottle_merge_conflicts!(file)
     # rubocop:disable Style/DisableCopsWithinSourceCodeDirective, Lint/FlipFlop
-    new_contents = File.read(file).lines.map do |l|
-      if l == "  bottle do\n" .. l == "  end\n"
+    new_contents = File.read(file).lines.map do |line|
+      if line == "  bottle do\n" .. line == "  end\n"
         # Now inside a bottle block.
-        if l == "<<<<<<< HEAD\n" .. l == ">>>>>>> homebrew/master\n"
+        if CONFLICT_START.match?(line) .. CONFLICT_END.match?(line)
           # Now inside a merge conflict.
           # Skip top part of merge conflict.
-          next if l == "<<<<<<< HEAD\n" .. l == "=======\n"
+          next if CONFLICT_START.match?(line) .. CONFLICT_BOUNDARY.match?(line)
 
           # Remove `cellar :any`, etc. lines.
-          next if l.include? "cellar"
+          next if line.include? "cellar"
 
           # Remove trailing bit of merge conflict.
-          next if l == ">>>>>>> homebrew/master\n"
+          next if CONFLICT_END.match?(line)
         end
       end
-      l
+      line
     end.compact.join
     # rubocop:enable Lint/FlipFlop, Style/DisableCopsWithinSourceCodeDirective
 
