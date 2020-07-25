@@ -33,7 +33,10 @@ module Homebrew
     return @editor if @editor
 
     @editor = [which_editor]
-    @editor += ["-f", "+/^<<<<"] if %w[gvim nvim vim vi].include? File.basename(editor[0])
+    ed = File.basename @editor[0]
+
+    @editor += ["-c", "silent!  /^<<<<<<<\\|=======\\|>>>>>>>"] if %w[mvim gvim nvim vim].include? ed
+    @editor << "--nofork" if %w[mvim gvim].include? ed
     @editor
   end
 
