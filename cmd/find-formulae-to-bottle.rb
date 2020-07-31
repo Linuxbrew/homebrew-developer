@@ -58,7 +58,7 @@ module Homebrew
   end
 
   def find_formulae_to_bottle
-    find_formulae_to_bottle_args.parse
+    args = find_formulae_to_bottle_args.parse
 
     formulae_to_bottle = []
     latest_merge_commit_message = Utils.popen_read("git", "log", "--format=%b", "-1").chomp
@@ -81,7 +81,7 @@ module Homebrew
       should_not_build_linux_bottle?(Formula[formula], tag)
     end
 
-    reason_to_not_build_bottle(Formula[@formula], tag) if Homebrew.args.verbose?
+    reason_to_not_build_bottle(Formula[@formula], tag) if args.verbose?
 
     puts formulae_to_bottle
   end

@@ -46,9 +46,9 @@ module Homebrew
   end
 
   def request_bottle
-    request_bottle_args.parse
+    args = request_bottle_args.parse
 
-    raise FormulaUnspecifiedError if Homebrew.args.named.empty?
+    raise FormulaUnspecifiedError if args.named.empty?
 
     user = git_user.strip
     email = git_email.strip
@@ -56,15 +56,15 @@ module Homebrew
     odie "User not specified" if user.empty?
     odie "Email not specified" if email.empty?
 
-    Homebrew.args.resolved_formulae.each do |formula|
+    args.resolved_formulae.each do |formula|
       event_name = formula.name.to_s
-      event_name += " (##{Homebrew.args.issue})" if Homebrew.args.issue
+      event_name += " (##{args.issue})" if args.issue
 
       payload = { formula:       formula.name,
                   name:          user,
                   email:         email,
-                  ignore_errors: Homebrew.args.ignore_errors?,
-                  issue:         Homebrew.args.issue || 0 }
+                  ignore_errors: args.ignore_errors?,
+                  issue:         args.issue || 0 }
       data = { event_type: event_name, client_payload: payload }
       url = "https://api.github.com/repos/Homebrew/linuxbrew-core/dispatches"
       GitHub.open_api(url, data: data, request_method: :POST, scopes: ["repo"])

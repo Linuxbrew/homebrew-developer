@@ -23,10 +23,6 @@ module Homebrew
     end
   end
 
-  def remote
-    Homebrew.args.remote || ENV["HOMEBREW_GITHUB_USER"] || ENV["USER"]
-  end
-
   def open_pull_request?(formula, tap)
     prs = GitHub.issues_for_formula(formula,
       type: "pr", state: "open", repo: tap.full_name)
@@ -38,7 +34,7 @@ module Homebrew
     prs.any?
   end
 
-  def add_formula(formula, tap)
+  def add_formula(formula, tap, remote, args:)
     dest = Pathname.new "#{tap.formula_dir}/#{formula.name}.rb"
     ohai "Migrating #{formula.full_name} to #{tap}"
     odie "Source and destination tap are the same." if formula.tap == tap
@@ -65,9 +61,9 @@ module Homebrew
     with_homebrew_path { safe_system(*which_editor.split, dest) }
 
     full_name = "#{tap}/#{formula.name}"
-    safe_system HOMEBREW_BREW_FILE, "style", full_name unless Homebrew.args.skip_style?
-    safe_system HOMEBREW_BREW_FILE, "install", "-s", full_name unless Homebrew.args.skip_install?
-    safe_system HOMEBREW_BREW_FILE, "audit", "--new-formula", full_name unless Homebrew.args.skip_audit?
+    safe_system HOMEBREW_BREW_FILE, "style", full_name unless args.skip_style?
+    safe_system HOMEBREW_BREW_FILE, "install", "-s", full_name unless args.skip_install?
+    safe_system HOMEBREW_BREW_FILE, "audit", "--new-formula", full_name unless args.skip_audit?
 
     cd dest.dirname do
       branch = "migrate-#{formula.name}"
@@ -87,7 +83,7 @@ module Homebrew
     end
   end
 
-  def remove_formula(formula, tap, add_pr)
+  def remove_formula(formula, tap, add_pr, remote)
     cd formula.tap.formula_dir do
       branch = "migrate-#{formula.name}"
       safe_system "git", "checkout", "master"
@@ -117,8 +113,8 @@ module Homebrew
     end
   end
 
-  def migrate(formula)
-    tap = Tap.new(*(Homebrew.args.tap || "homebrew/core")).split("/")
+  def migrate(formula, args:)
+    tap = Tap.new(*(args.tap || "homebrew/core")).split("/")
     if formula.tap.to_s == tap.to_s
       opoo "#{formula.name} is already in #{tap}"
       return
@@ -126,15 +122,16 @@ module Homebrew
 
     return if open_pull_request?(formula, tap)
 
-    add_pr = add_formula(formula, tap)
-    remove_formula(formula, tap, add_pr)
+    remote = args.remote || ENV["HOMEBREW_GITHUB_USER"] || ENV["USER"]
+    add_pr = add_formula(formula, tap, remote, args: args)
+    remove_formula(formula, tap, add_pr, remote)
   end
 
   def migrate_formula
-    migrate_formula_args.parse
+    args = migrate_formula_args.parse
 
-    raise FormulaUnspecifiedError if Homebrew.args.named.empty?
+    raise FormulaUnspecifiedError if args.named.empty?
 
-    migrate(formula)
+    migrate(formula, args: args)
   end
 end

@@ -20,40 +20,35 @@ module Homebrew
     end
   end
 
-  def git?
-    homebrew_repo_dir == linuxbrew_repo_dir
-  end
-
-  def linux_only?(formula)
+  def linux_only?(linuxbrew_repo_dir, formula)
     File.read("#{linuxbrew_repo_dir}/Formula/#{formula}").match("depends_on :linux")
   end
 
-  def homebrew_repo_dir
-    @homebrew_repo_dir ||= Homebrew.args.homebrew_repo_dir || CoreTap.instance.path
-  end
-
-  def linuxbrew_repo_dir
-    @linuxbrew_repo_dir ||= Homebrew.args.linuxbrew_repo_dir || CoreTap.instance.path
-  end
-
-  def homebrew_core_formulae
-    quiet_system("git", "-C", homebrew_repo_dir, "checkout", "homebrew/master") if git?
-    formulae = Dir.entries("#{homebrew_repo_dir}/Formula").reject! { |f| File.directory?(f) }.sort
-    quiet_system("git", "-C", homebrew_repo_dir, "checkout", "-") if git?
+  def homebrew_core_formulae(homebrew_repo_dir, git)
+    quiet_system("git", "-C", homebrew_repo_dir, "checkout", "homebrew/master") if git
+    formulae = Dir.entries("#{homebrew_repo_dir}/Formula")
+                  .reject { |f| File.directory?(f) }.sort
+    quiet_system("git", "-C", homebrew_repo_dir, "checkout", "-") if git
     formulae
   end
 
-  def linuxbrew_core_formulae
-    quiet_system("git", "-C", homebrew_repo_dir, "checkout", "master") if git?
-    formulae = Dir.entries("#{linuxbrew_repo_dir}/Formula").reject! { |f| File.directory?(f) || linux_only?(f) }.sort
-    quiet_system("git", "-C", homebrew_repo_dir, "checkout", "-") if git?
+  def linuxbrew_core_formulae(homebrew_repo_dir, linuxbrew_repo_dir, git)
+    quiet_system("git", "-C", homebrew_repo_dir, "checkout", "master") if git
+    formulae = Dir.entries("#{linuxbrew_repo_dir}/Formula")
+                  .reject { |f| File.directory?(f) || linux_only?(linuxbrew_repo_dir, f) }.sort
+    quiet_system("git", "-C", homebrew_repo_dir, "checkout", "-") if git
     formulae
   end
 
   def check_for_deleted_upstream_core_formulae
-    check_for_deleted_upstream_core_formulae_args.parse
+    args = check_for_deleted_upstream_core_formulae_args.parse
 
-    formulae_only_in_linuxbrew = linuxbrew_core_formulae - homebrew_core_formulae
+    homebrew_repo_dir = args.homebrew_repo_dir || CoreTap.instance.path
+    linuxbrew_repo_dir = args.linuxbrew_repo_dir || CoreTap.instance.path
+    git = homebrew_repo_dir == linuxbrew_repo_dir
+
+    formulae_only_in_linuxbrew = linuxbrew_core_formulae(homebrew_repo_dir, linuxbrew_repo_dir, git) -
+                                 homebrew_core_formulae(homebrew_repo_dir, git)
     if formulae_only_in_linuxbrew.empty?
       ohai "No formulae need deleting."
     else

@@ -41,11 +41,11 @@ module Homebrew
   end
 
   def announce
-    announce_args.parse
+    args = announce_args.parse
 
-    raise FormulaUnspecifiedError if Homebrew.args.named.empty?
+    raise FormulaUnspecifiedError if args.named.empty?
 
-    Homebrew.args.resolved_formulae.each do |formula|
+    args.resolved_formulae.each do |formula|
       announce_formula formula
     end
   end

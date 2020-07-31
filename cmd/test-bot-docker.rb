@@ -20,13 +20,13 @@ module Homebrew
   end
 
   def test_bot_docker
-    test_bot_docker_args.parse
+    args = test_bot_docker_args.parse
 
     if ENV["HOMEBREW_BINTRAY_USER"].nil? || ENV["HOMEBREW_BINTRAY_KEY"].nil?
       raise "Missing HOMEBREW_BINTRAY_USER or HOMEBREW_BINTRAY_KEY variables!"
     end
 
-    formulae = Homebrew.args.named
+    formulae = args.named
     safe_system "docker", "run", "--name=linuxbrew-test-bot",
       "-e", "HOMEBREW_BINTRAY_USER", "-e", "HOMEBREW_BINTRAY_KEY",
       "homebrew/brew",

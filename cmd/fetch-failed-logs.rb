@@ -31,7 +31,7 @@ module Homebrew
     end
   end
 
-  def get_failed_lines(file)
+  def get_failed_lines(file, args:)
     # Border lines indexes
     brew_index = -1
     pairs = []
@@ -51,7 +51,7 @@ module Homebrew
     return [] if pairs.empty?
 
     # Remove timestamp prefix on every line and optionally control codes
-    strip_ansi = Homebrew.args.markdown? || !Tty.color?
+    strip_ansi = args.markdown? || !Tty.color?
     content.map! do |line|
       line = Tty.strip_ansi(line) if strip_ansi
       line.split(" ")[1..]&.join(" ")
@@ -66,11 +66,11 @@ module Homebrew
   end
 
   def fetch_failed_logs
-    fetch_failed_logs_args.parse
+    args = fetch_failed_logs_args.parse
 
-    formula = Homebrew.args.resolved_formulae.first
-    event = Homebrew.args.dispatched? ? "repository_dispatch" : "pull_request"
-    tap_name = Homebrew.args.tap || CoreTap.instance.name
+    formula = args.resolved_formulae.first
+    event = args.dispatched? ? "repository_dispatch" : "pull_request"
+    tap_name = args.tap || CoreTap.instance.name
     repo = Tap.fetch(tap_name).full_name
 
     # First get latest workflow runs
@@ -109,7 +109,7 @@ module Homebrew
 
     odie "No workflow run matching the criteria was found" unless workflow_run
 
-    unless Homebrew.args.quiet?
+    unless args.quiet?
       oh1 "Workflow details:"
       puts JSON.pretty_generate(workflow_run.slice("id", "event", "status", "conclusion", "created_at"))
     end
@@ -119,14 +119,14 @@ module Homebrew
     # extract it there and print
     url = workflow_run["logs_url"]
     response = GitHub.open_api(url, request_method: :GET, scopes: ["repo"], parse_json: false)
-    Mktemp.new("brewlogs-#{formula.name}", retain: Homebrew.args.keep_tmp?).run do |context|
+    Mktemp.new("brewlogs-#{formula.name}", retain: args.keep_tmp?).run do |context|
       tmpdir = context.tmpdir
       file = "#{tmpdir}/logs.zip"
       File.write(file, response)
       safe_system("unzip", "-qq", "-d", tmpdir, file)
       Dir["#{tmpdir}/*.txt"].each do |f|
-        get_failed_lines(f).each do |command, contents|
-          if Homebrew.args.markdown?
+        get_failed_lines(f, args: args).each do |command, contents|
+          if args.markdown?
             puts <<~EOMARKDOWN
               <details>
               <summary>#{command}</summary>

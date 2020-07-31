@@ -21,17 +21,17 @@ module Homebrew
   end
 
   def find_not_bottled
-    find_not_bottled_args.parse
+    args = find_not_bottled_args.parse
 
     must_find = [
-      Homebrew.args.must_find,
+      args.must_find,
     ].compact
 
     must_not_find = [
       /bottle :unneeded/,
       /depends_on :xcode/,
       /:x86_64_linux/,
-      Homebrew.args.must_not_find,
+      args.must_not_find,
     ].compact
 
     tap = Tap.fetch(args.tap || CoreTap.instance.name)
