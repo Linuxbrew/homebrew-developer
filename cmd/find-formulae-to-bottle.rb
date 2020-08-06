@@ -11,8 +11,8 @@ module Homebrew
         Find conflicting formulae from the latest merge commit.
         Outputs a list that can be passed to `brew request-bottle`.
       EOS
-      switch :verbose,
-             description: "Print debugging information, e.g. if a formula already has a bottle PR open."
+      switch "-v", "--verbose",
+             description: "Print additional information, e.g. if a formula already has a bottle PR open."
       max_named 0
     end
   end

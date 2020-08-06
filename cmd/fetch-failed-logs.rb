@@ -25,8 +25,6 @@ module Homebrew
         description: "Retain the temporary directory containing the downloaded workflow."
       switch "--markdown",
         description: "Format the output using Markdown."
-      switch :verbose
-      switch :debug
       named 1
     end
   end
