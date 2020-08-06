@@ -4,10 +4,6 @@ require "date"
 module Homebrew
   module_function
 
-  CONFLICT_START = /^<{7,} /.freeze
-  CONFLICT_BOUNDARY = /^={7,}/.freeze
-  CONFLICT_END = /^>{7,} /.freeze
-
   def merge_homebrew_args
     Homebrew::CLI::Parser.new do
       usage_banner <<~EOS
@@ -33,10 +29,7 @@ module Homebrew
     return @editor if @editor
 
     @editor = [which_editor]
-    ed = File.basename @editor[0]
-
-    @editor += ["-c", "silent!  /^<<<<<<<\\|=======\\|>>>>>>>"] if %w[mvim gvim nvim vim].include? ed
-    @editor << "--nofork" if %w[mvim gvim].include? ed
+    @editor += ["-f", "+/^<<<<"] if %w[gvim nvim vim vi].include? File.basename(editor[0])
     @editor
   end
 
@@ -70,35 +63,9 @@ module Homebrew
     homebrew_commits(args: args).each { |sha1| git_merge_commit sha1, fast_forward: fast_forward }
   end
 
-  def fix_bottle_merge_conflicts!(file)
-    # rubocop:disable Style/DisableCopsWithinSourceCodeDirective, Lint/FlipFlop
-    new_contents = File.read(file).lines.map do |line|
-      if line == "  bottle do\n" .. line == "  end\n"
-        # Now inside a bottle block.
-        if CONFLICT_START.match?(line) .. CONFLICT_END.match?(line)
-          # Now inside a merge conflict.
-          # Skip top part of merge conflict.
-          next if CONFLICT_START.match?(line) .. CONFLICT_BOUNDARY.match?(line)
-
-          # Remove `cellar :any`, etc. lines.
-          next if line.include? "cellar"
-
-          # Remove trailing bit of merge conflict.
-          next if CONFLICT_END.match?(line)
-        end
-      end
-      line
-    end.compact.join
-    # rubocop:enable Lint/FlipFlop, Style/DisableCopsWithinSourceCodeDirective
-
-    File.atomic_write(file) { |f| f.write(new_contents) }
-  end
-
   def resolve_conflicts(args:)
     conflicts = Utils.popen_read(git, "diff", "--name-only", "--diff-filter=U").split
     return conflicts if conflicts.empty?
-
-    conflicts.each { |f| fix_bottle_merge_conflicts! f }
 
     oh1 "Conflicts"
     puts conflicts.join(" ")
