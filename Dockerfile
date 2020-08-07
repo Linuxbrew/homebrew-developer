@@ -27,12 +27,12 @@ RUN apt-get update \
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # hadolint ignore=DL3003
-RUN curl -sL https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.18.0.tar.gz | tar xz \
-    && cd /git-2.18.0 \
+RUN curl -sL https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.28.0.tar.gz | tar xz \
+    && cd /git-2.28.0 \
     && make configure \
     && ./configure --prefix=/usr/local \
     && make install NO_TCLTK=1 \
-    && rm -rf /git-2.18.0 \
+    && rm -rf /git-2.28.0 \
     && ln -fs /usr/local/bin/git /usr/bin/git
 
 USER linuxbrew
