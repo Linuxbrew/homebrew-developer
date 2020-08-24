@@ -19,29 +19,29 @@ module Homebrew
   end
 
   def head_is_merge_commit?
-    Utils.popen_read(Utils.git_path, "log", "--merges", "-1", "--format=%H").chomp \
-      == Utils.popen_read(Utils.git_path, "rev-parse", "HEAD").chomp
+    Utils.popen_read(Utils::Git.path, "log", "--merges", "-1", "--format=%H").chomp \
+      == Utils.popen_read(Utils::Git.path, "rev-parse", "HEAD").chomp
   end
 
   def git_user
     if ENV["CI"] && head_is_merge_commit?
-      Utils.popen_read(Utils.git_path, "log", "-1", "--pretty=%an")
+      Utils.popen_read(Utils::Git.path, "log", "-1", "--pretty=%an")
     else
       ENV["HOMEBREW_GIT_NAME"] ||
         ENV["GIT_AUTHOR_NAME"] ||
         ENV["GIT_COMMITTER_NAME"] ||
-        Utils.popen_read(Utils.git_path, "config", "--get", "user.name")
+        Utils.popen_read(Utils::Git.path, "config", "--get", "user.name")
     end
   end
 
   def git_email
     if ENV["CI"] && head_is_merge_commit?
-      Utils.popen_read(Utils.git_path, "log", "-1", "--pretty=%ae")
+      Utils.popen_read(Utils::Git.path, "log", "-1", "--pretty=%ae")
     else
       ENV["HOMEBREW_GIT_EMAIL"] ||
         ENV["GIT_AUTHOR_EMAIL"] ||
         ENV["GIT_COMMITTER_EMAIL"] ||
-        Utils.popen_read(Utils.git_path, "config", "--get", "user.email")
+        Utils.popen_read(Utils::Git.path, "config", "--get", "user.email")
     end
   end
 
