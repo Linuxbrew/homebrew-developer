@@ -152,7 +152,7 @@ module Homebrew
         puts deleted_files
       end
 
-      safe_system("brew", "readall", "--aliases")
+      safe_system("brew", "readall", "--aliases", Tap.from_path(core_tap).name)
 
       hub_pull_request branch, message, args: args
     end
