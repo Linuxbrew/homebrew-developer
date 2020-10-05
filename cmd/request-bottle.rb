@@ -47,6 +47,10 @@ module Homebrew
     end
   end
 
+  def tap_remote(tap)
+    tap.remote.match(%r{github.com[/:]([A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)}i)[1]
+  end
+
   def request_bottle
     args = request_bottle_args.parse
 
@@ -59,6 +63,14 @@ module Homebrew
     odie "Email not specified" if email.empty?
 
     args.named.to_resolved_formulae.each do |formula|
+      # Always dispatch core formulae against Homebrew/linuxbrew-core,
+      # even on macOS.
+      remote = if formula.tap == CoreTap.instance
+        "Homebrew/linuxbrew-core"
+      else
+        tap_remote(formula.tap)
+      end
+
       event_name = formula.name.to_s
       event_name += " (##{args.issue})" if args.issue
 
@@ -68,7 +80,8 @@ module Homebrew
                   ignore_errors: args.ignore_errors?,
                   issue:         args.issue || 0 }
       data = { event_type: event_name, client_payload: payload }
-      url = "https://api.github.com/repos/Homebrew/linuxbrew-core/dispatches"
+      ohai "Dispatching request to #{remote} for #{formula}"
+      url = "https://api.github.com/repos/#{remote}/dispatches"
       GitHub.open_api(url, data: data, request_method: :POST, scopes: ["repo"])
     end
   end
