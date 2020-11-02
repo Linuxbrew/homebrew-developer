@@ -27,7 +27,7 @@ module Homebrew
 
   def open_pull_request?(formula, tap)
     prs = GitHub.issues_for_formula(formula,
-                                    type: "pr", state: "open", repo: tap.full_name)
+                                    state: "open", tap: tap)
     prs = prs.select { |pr| pr["title"].strip.start_with? "#{formula}: " }
     if prs.any?
       opoo "#{formula}: Skipping because a PR is open"
@@ -116,7 +116,7 @@ module Homebrew
   end
 
   def migrate(formula, args:)
-    tap = Tap.new(*(args.tap || "homebrew/core")).split("/")
+    tap = Tap.new(*(args.tap || "homebrew/core").split("/"))
     if formula.tap.to_s == tap.to_s
       opoo "#{formula.name} is already in #{tap}"
       return
@@ -134,6 +134,8 @@ module Homebrew
 
     raise FormulaUnspecifiedError if args.named.empty?
 
-    migrate(formula, args: args)
+    args.named.to_resolved_formulae.each do |formula|
+      migrate(formula, args: args)
+    end
   end
 end
