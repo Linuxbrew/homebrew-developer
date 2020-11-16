@@ -18,6 +18,7 @@ RUN apt-get update \
        libcurl4-openssl-dev \
        libz-dev \
        make \
+       procps \
        software-properties-common \
        sudo \
        texinfo \
