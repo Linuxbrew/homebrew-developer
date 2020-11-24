@@ -47,7 +47,7 @@ module Homebrew
 
     raise FormulaUnspecifiedError if args.named.empty?
 
-    args.resolved_formulae.each do |formula|
+    args.named.to_resolved_formulae.each do |formula|
       announce_formula formula
     end
   end
