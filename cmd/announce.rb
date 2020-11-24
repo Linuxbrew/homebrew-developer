@@ -38,7 +38,7 @@ module Homebrew
     puts "📖 #{cite}" if cite
     puts <<~EOS
       🔬 #{formula.tap.remote}
-      🐧 http://linuxbrew.sh #bioinformatics
+      🐧 https://brew.sh #bioinformatics
     EOS
   end
 
