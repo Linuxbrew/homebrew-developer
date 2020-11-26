@@ -9,7 +9,6 @@ Tools for Homebrew on Linux developers
 + **find-not-bottled**: Search for formulae in [Homebrew/linuxbrew-core][linuxbrew-core] that do not have a bottle for Linux.
 + **merge-homebrew**: Merge Homebrew/repo into Linuxbrew/repo.
 + **migrate-formula**: Migrate a formula to a new tap and open appropriate pull requests.
-+ **pull-macos**: Pull a bottle for macOS (when running Homebrew on Linux).
 + **request-bottle**: Trigger a GitHub Actions CI to build Linux bottle for the specified a formula(e).
 + **test-bot-docker**: Run `brew test-bot` in a Docker container.
 
