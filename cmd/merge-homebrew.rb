@@ -23,7 +23,7 @@ module Homebrew
       switch "--skip-style",
              description: "Skip running `brew style` on merged formulae."
       conflicts "--core", "--tap"
-      max_named 1
+      named_args max: 1
     end
   end
 
