@@ -54,7 +54,7 @@ module Homebrew
     strip_ansi = args.markdown? || !Tty.color?
     content.map! do |line|
       line = Tty.strip_ansi(line) if strip_ansi
-      line.split(" ")[1..]&.join(" ")
+      line.split[1..]&.join(" ")
     end
 
     # Print only interesting lines
