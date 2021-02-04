@@ -62,6 +62,10 @@ module Homebrew
     odie "User not specified" if user.empty?
     odie "Email not specified" if email.empty?
 
+    if !ENV["HOMEBREW_GITHUB_API_TOKEN"]
+      odie "`HOMEBREW_GITHUB_API_TOKEN` envvar not present. Generate a GitHub API token with `gist, read:org, public_repo and workflow` scopes at https://github.com/settings/tokens."
+    end
+
     args.named.to_resolved_formulae.each do |formula|
       # Always dispatch core formulae against Homebrew/linuxbrew-core,
       # even on macOS.
