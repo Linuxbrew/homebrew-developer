@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "cli/parser"
-require "utils/github"
+require "utils/github/api"
 
 module Homebrew
   module_function
@@ -82,7 +82,7 @@ module Homebrew
       data = { event_type: event_name, client_payload: payload }
       ohai "Dispatching request to #{remote} for #{formula}"
       url = "https://api.github.com/repos/#{remote}/dispatches"
-      GitHub.open_api(url, data: data, request_method: :POST, scopes: ["repo"])
+      GitHub::API.open_rest(url, data: data, request_method: :POST, scopes: ["repo"])
     end
   end
 end

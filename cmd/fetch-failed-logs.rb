@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require "cli/parser"
-require "utils/github"
+require "utils/github/api"
 require "utils/tty"
 require "mktemp"
 
@@ -75,7 +75,7 @@ module Homebrew
 
     # First get latest workflow runs
     url = "https://api.github.com/repos/#{repo}/actions/runs?status=failure&event=#{event}&per_page=100"
-    response = GitHub.open_api(url, request_method: :GET, scopes: ["repo"])
+    response = GitHub::API.open_rest(url, request_method: :GET, scopes: ["repo"])
     workflow_runs = response["workflow_runs"]
 
     # Then iterate over them and find the matching one...
@@ -85,7 +85,7 @@ module Homebrew
       case run["event"]
       when "repository_dispatch"
         url = run["jobs_url"]
-        response = GitHub.open_api(url, request_method: :GET, scopes: ["repo"])
+        response = GitHub::API.open_rest(url, request_method: :GET, scopes: ["repo"])
         jobs = response["jobs"]
         jobs.find do |job|
           steps = job["steps"]
@@ -98,7 +98,7 @@ module Homebrew
       # check if equal to formula
       when "pull_request"
         url = "https://api.github.com/repos/#{repo}/commits/#{run["head_sha"]}"
-        response = GitHub.open_api(url, request_method: :GET, scopes: ["repo"])
+        response = GitHub::API.open_rest(url, request_method: :GET, scopes: ["repo"])
         commit_files = response["files"].map { |f| f["filename"] }
         odebug "Run ##{run["id"]} - #{commit_files.join ", "}"
         commit_files.find do |file|
@@ -118,7 +118,7 @@ module Homebrew
     # create a temporary directory,
     # extract it there and print
     url = workflow_run["logs_url"]
-    response = GitHub.open_api(url, request_method: :GET, scopes: ["repo"], parse_json: false)
+    response = GitHub::API.open_rest(url, request_method: :GET, scopes: ["repo"], parse_json: false)
     Mktemp.new("brewlogs-#{formula.name}", retain: args.keep_tmp?).run do |context|
       tmpdir = context.tmpdir
       file = "#{tmpdir}/logs.zip"
