@@ -12,6 +12,7 @@ RUN apt-get update \
        curl \
        file \
        flex \
+       gawk \
        gettext \
        gcc \
        g++ \
