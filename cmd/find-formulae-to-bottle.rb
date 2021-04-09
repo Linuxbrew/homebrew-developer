@@ -16,7 +16,7 @@ module Homebrew
       EOS
       switch "-v", "--verbose",
              description: "Print additional information, e.g. if a formula already has a bottle PR open."
-      max_named 0
+      named_args max: 0
     end
   end
 

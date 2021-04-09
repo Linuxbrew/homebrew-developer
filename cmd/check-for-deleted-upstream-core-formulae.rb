@@ -18,7 +18,7 @@ module Homebrew
              description: "Full path to the Homebrew/linuxbrew-core repo on disk."
       flag   "--homebrew-repo-dir=",
              description: "Full path to the Homebrew/homebrew-core repo on disk."
-      max_named 0
+      named_args max: 0
     end
   end
 

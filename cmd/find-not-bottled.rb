@@ -18,7 +18,7 @@ module Homebrew
              description: "Match only formulae that do not contain the given pattern."
       flag   "--tap=",
              description: "Specify a tap rather than the default #{CoreTap.instance.name}."
-      max_named 0
+      named_args max: 0
     end
   end
 
