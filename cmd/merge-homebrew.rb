@@ -107,6 +107,10 @@ module Homebrew
     Utils.popen_read(git, "diff", "--name-only", "--diff-filter=D", "HEAD~1..HEAD").split
   end
 
+  def modified_files_after_merge
+    Utils.popen_read(git, "diff", "--name-only", "--diff-filter=M", "HEAD~1..HEAD").split
+  end
+
   def merge_core(args:)
     core_tap = if OS.linux?
       CoreTap.instance.path
@@ -134,6 +138,16 @@ module Homebrew
       git_merge(false, args: args)
       conflict_files = resolve_conflicts(args: args)
       safe_system git, "commit" unless conflict_files.empty?
+
+      modified_files = modified_files_after_merge
+      modified_files.each do |file_name|
+        delete_all_bottle_block(file_name)
+      end
+      safe_system git, "add", "--", *modified_files unless modified_files.empty?
+      safe_system git, "commit", "--amend", "--no-edit" unless modified_files.empty?
+
+      conflict_files = conflict_files.concat(modified_files).uniq
+
       conflicts = conflict_files.map { |s| s.gsub(%r{^Formula/|\.rb$}, "") }
       sha1 = Utils.popen_read(git, "rev-parse", "--short", homebrew_commits(args: args).last).chomp
       branch = "merge-#{Date.today}-#{sha1}"
@@ -156,6 +170,18 @@ module Homebrew
 
       hub_pull_request branch, message, args: args
     end
+  end
+
+  def delete_all_bottle_block(file_name)
+    text = File.read(file_name)
+
+    new_text = text.sub(/^  bottle(.*)sha256(.*)all:(.*?)end$/m, "")
+
+    # https://stackoverflow.com/questions/47461895/regex-match-empty-lines
+    new_text = new_text.sub(/^(?:\h*\n){2,}$/m, "")
+
+    # To write changes to the file, use:
+    File.open(file_name, "w") { |file| file.puts new_text }
   end
 
   def homebrew_commits(args:)
