@@ -34,6 +34,15 @@ RUN apt-get update \
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # hadolint ignore=DL3003
+RUN curl -sL https://ftp.gnu.org/gnu/tar/tar-1.32.tar.gz | tar xz \
+    && cd /tar-1.32 \
+    && ./configure --prefix=/usr/local \
+    && make install \
+    && rm -rf /tar-1.32 \
+    && ln -fs /usr/local/bin/tar /usr/bin/tar
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+# hadolint ignore=DL3003
 RUN curl -sL https://mirrors.edge.kernel.org/pub/software/scm/git/git-2.28.0.tar.gz | tar xz \
     && cd /git-2.28.0 \
     && make configure \
