@@ -142,6 +142,7 @@ module Homebrew
       modified_files = modified_files_after_merge
       modified_files.each do |file_name|
         delete_all_bottle_block(file_name)
+        delete_homebrew_core_bottle(file_name)
       end
       safe_system git, "add", "--", *modified_files unless modified_files.empty?
       safe_system git, "commit", "--amend", "--no-edit" unless modified_files.empty?
@@ -170,6 +171,15 @@ module Homebrew
 
       hub_pull_request branch, message, args: args
     end
+  end
+
+  def delete_homebrew_core_bottle(file_name)
+    content = File.readlines(file_name)
+    return if content.grep(/x86_64_linux:/).size.positive? && content.grep(/" # linuxbrew-core/).size.positive?
+
+    text = File.read(file_name)
+    new_text = text.lines.reject { |x| x.include? "x86_64_linux:" }.join
+    File.open(file_name, "w") { |file| file.puts new_text }
   end
 
   def delete_all_bottle_block(file_name)
