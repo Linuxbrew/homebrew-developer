@@ -12,6 +12,7 @@ RUN apt-get update \
        autoconf \
        automake \
        bison \
+       bzip2 \
        ca-certificates \
        curl \
        file \
